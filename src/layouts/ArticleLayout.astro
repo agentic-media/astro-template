@@ -137,7 +137,7 @@ const articleSchema = {
   },
   publisher: {
     '@type': 'Organization',
-    name: 'Insieme Salute Toscana',
+    name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
     url: Astro.site?.toString() ?? '',
     logo: {
       '@type': 'ImageObject',

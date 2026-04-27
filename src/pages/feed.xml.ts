@@ -11,12 +11,11 @@ export async function GET(context: APIContext) {
   );
 
   return rss({
-    title: 'Insieme Salute Toscana',
-    description:
-      'Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti.',
+    title: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+    description: import.meta.env.PUBLIC_RSS_DESCRIPTION ?? import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
     site: context.site?.toString() ?? 'https://example.com',
-    language: 'it-IT',
-    customData: `<language>it-IT</language>`,
+    language: (import.meta.env.PUBLIC_LANGUAGE ?? 'it') === 'en' ? 'en-US' : 'it-IT',
+    customData: `<language>${(import.meta.env.PUBLIC_LANGUAGE ?? 'it') === 'en' ? 'en-US' : 'it-IT'}</language>`,
     items: sorted.map((article) => ({
       title: article.data.title,
       description: article.data.description,

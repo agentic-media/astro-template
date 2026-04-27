@@ -2,11 +2,14 @@
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 ---
 
 <Base
-  title="Pagina non trovata (404) — Insieme Salute Toscana"
-  description="La pagina che cerchi non esiste o è stata spostata. Torna alla homepage di Insieme Salute Toscana."
+  title={`Pagina non trovata (404) — ${siteName}`}
+  description="La pagina che cerchi non esiste o è stata spostata. Torna alla homepage."
+  noindex={true}
 >
   <Header />
 

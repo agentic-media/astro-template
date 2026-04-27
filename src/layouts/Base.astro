@@ -15,6 +15,8 @@ export interface Props {
   /** Pagination relationships for multi-page articles */
   prevPageHref?: string | null;
   nextPageHref?: string | null;
+  /** When true, emit `<meta name="robots" content="noindex, nofollow">`. Use for 404, draft previews, internal-only pages. */
+  noindex?: boolean;
 }
 
 const {
@@ -29,6 +31,7 @@ const {
   bodyClass,
   prevPageHref,
   nextPageHref,
+  noindex = false,
 } = Astro.props;
 
 // Per-site config — all read at build time from Cloudflare Pages env
@@ -125,6 +128,9 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {noindex
+      ? <meta name="robots" content="noindex, nofollow" />
+      : <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />}
     {prevPageHref && <link rel="prev" href={prevPageHref} />}
     {nextPageHref && <link rel="next" href={nextPageHref} />}
 
@@ -243,6 +249,23 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
           {`gtag('js', new Date()); gtag('config', GA_ID);`}
         </script>
       </>
+    )}
+    {type === 'website' && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: cfg.siteName,
+        url: Astro.site?.toString() ?? '',
+        inLanguage: cfg.ogLocale.replace('_', '-'),
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${(Astro.site?.toString() ?? '').replace(/\/$/, '')}/cerca/?q={search_term_string}`,
+          },
+          'query-input': 'required name=search_term_string',
+        },
+      })} />
     )}
   </head>
   <body class={bodyClass}>
