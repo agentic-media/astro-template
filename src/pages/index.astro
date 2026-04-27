@@ -33,15 +33,14 @@ const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
-  url: '${Astro.site?.toString().replace(/\/$/,'') ?? 'https://example.com'}',
-  description:
-    (import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ''),
-  inLanguage: 'it-IT',
+  url: (Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'),
+  description: (import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ''),
+  inLanguage: (import.meta.env.PUBLIC_OG_LOCALE ?? 'it_IT').replace('_', '-'),
   potentialAction: {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: '${Astro.site?.toString().replace(/\/$/,'') ?? 'https://example.com'}/cerca/?q={search_term_string}',
+      urlTemplate: `${Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'}/cerca/?q={search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },
