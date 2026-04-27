@@ -22,7 +22,9 @@ const links = [
 const currentYear = new Date().getFullYear();
 interface Props { logoTop?: string; logoBottom?: string; siteName?: string }
 const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.props as Props;
-
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+const siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '';
+const currentYear = new Date().getFullYear();
 ---
 
 <footer class="ist-footer">
@@ -30,14 +32,13 @@ const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.
     <div class="ist-footer__grid">
       <!-- Brand column -->
       <div class="ist-footer__brand">
-        <a href="/" class="ist-logo ist-footer__logo" aria-label="Insieme Salute Toscana">
+        <a href="/" class="ist-logo ist-footer__logo" aria-label={siteName}>
           <span class="ist-logo__top">{logoTop}</span>
           <span class="ist-logo__salute">SALUTE</span>
           <span class="ist-logo__bottom">{logoBottom}</span>
         </a>
         <p class="ist-footer__lede">
-          Informazione sulla salute psicologica e il benessere in Toscana. Articoli
-          scritti da professionisti, per aiutarti a stare meglio ogni giorno.
+          {siteDescription}
         </p>
       </div>
 
@@ -65,7 +66,7 @@ const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.
     <!-- Bottom strip -->
     <div class="ist-footer__bottom">
       <span>
-        &copy; {currentYear} Insieme Salute Toscana. Tutti i diritti riservati.
+        &copy; {currentYear} {siteName}. Tutti i diritti riservati.
       </span>
       <span>
         I contenuti hanno scopo informativo e non sostituiscono il parere medico.

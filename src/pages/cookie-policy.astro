@@ -1,0 +1,164 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Cookie Policy', href: '#' },
+];
+
+const lastUpdated = '2024-01-01';
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+---
+
+<Base
+  title=`Cookie Policy — ${siteName}`
+  description="Informativa sull'uso dei cookie di ${siteName}: tipologie di cookie utilizzati e come gestirli."
+  canonicalUrl={new URL("/cookie-policy/", Astro.site).toString()}
+>
+  <Header />
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container" style="padding-bottom:60px; max-width:760px;">
+      <div class="ist-page-hero">
+        <h1 class="ist-page-hero__title">Cookie Policy</h1>
+        <p style="font-size:0.85rem; color:var(--contrast-3);">
+          Ultimo aggiornamento: {new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(lastUpdated))}
+        </p>
+      </div>
+
+      <div class="ist-single__content" style="background:var(--base-2); border-radius:var(--radius-card); padding:36px;">
+        <h2>Cosa sono i cookie</h2>
+        <p>
+          I cookie sono piccoli file di testo che i siti web salvano sul tuo dispositivo
+          quando li visiti. Vengono usati per far funzionare i siti correttamente,
+          ricordare le tue preferenze, o raccogliere informazioni statistiche.
+        </p>
+
+        <h2>Cookie tecnici (necessari)</h2>
+        <p>
+          Questi cookie sono indispensabili per il funzionamento del sito e non
+          possono essere disabilitati. Non raccolgono informazioni personali
+          identificabili.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Cookie</th>
+              <th>Scopo</th>
+              <th>Durata</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>_session</td>
+              <td>Gestione sessione utente</td>
+              <td>Sessione</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Cookie analitici</h2>
+        <p>
+          Utilizziamo Google Analytics 4 per analizzare il traffico del sito in
+          forma aggregata e anonimizzata. Questi cookie ci aiutano a capire come
+          gli utenti interagiscono con il sito e a migliorare i contenuti.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Cookie</th>
+              <th>Fornitore</th>
+              <th>Scopo</th>
+              <th>Durata</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>_ga</td>
+              <td>Google Analytics</td>
+              <td>Distingue gli utenti</td>
+              <td>2 anni</td>
+            </tr>
+            <tr>
+              <td>_ga_*</td>
+              <td>Google Analytics</td>
+              <td>Mantiene lo stato della sessione</td>
+              <td>2 anni</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Cookie pubblicitari</h2>
+        <p>
+          Questo sito utilizza Google AdSense per la visualizzazione di annunci.
+          Google potrebbe usare cookie per mostrare annunci pertinenti in base
+          alle tue precedenti navigazioni sul web.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Cookie</th>
+              <th>Fornitore</th>
+              <th>Scopo</th>
+              <th>Durata</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>IDE</td>
+              <td>Google DoubleClick</td>
+              <td>Targeting pubblicitario</td>
+              <td>1 anno</td>
+            </tr>
+            <tr>
+              <td>ANID</td>
+              <td>Google</td>
+              <td>Annunci personalizzati</td>
+              <td>13 mesi</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h2>Come gestire i cookie</h2>
+        <p>
+          Puoi controllare e/o eliminare i cookie come desideri. Per maggiori
+          informazioni, consulta <a href="https://www.aboutcookies.org" target="_blank" rel="noopener">aboutcookies.org</a>.
+          Puoi cancellare tutti i cookie già presenti sul tuo computer e impostare
+          la maggior parte dei browser in modo da impedirne l'installazione.
+        </p>
+        <p>
+          Tieni presente che se disabiliti i cookie, potresti non essere in grado
+          di usufruire di tutte le funzionalità del sito.
+        </p>
+
+        <h2>Link utili per la gestione dei cookie</h2>
+        <ul>
+          <li>
+            <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">
+              Impostazioni annunci Google
+            </a>
+          </li>
+          <li>
+            <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener">
+              Opt-out Google Analytics
+            </a>
+          </li>
+          <li>
+            <a href="https://www.youronlinechoices.com/it/" target="_blank" rel="noopener">
+              Your Online Choices (opt-out pubblicità comportamentale)
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

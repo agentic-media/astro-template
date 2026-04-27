@@ -1,0 +1,167 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Contatti', href: '#' },
+];
+
+const CONTACT_EMAIL = import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'redazione@example.com';
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+---
+
+<Base
+  title=`Contatti — ${siteName}`
+  description="Contatta la redazione di ${siteName} per collaborazioni, segnalazioni o domande editoriali."
+  canonicalUrl={new URL("/contatti/", Astro.site).toString()}
+>
+  <Header />
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container" style="padding-bottom:60px;">
+      <div class="ist-page-hero">
+        <h1 class="ist-page-hero__title">Contatti</h1>
+        <p class="ist-page-hero__desc">
+          Hai domande, vuoi proporre una collaborazione o segnalare un'imprecisione?
+          Scrivici: rispondiamo solitamente entro 2 giorni lavorativi.
+        </p>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:start;">
+        <!-- Contact form -->
+        <div>
+          <h2 style="font-size:1.2rem; font-weight:700; color:var(--navy); margin-bottom:24px;">
+            Invia un messaggio
+          </h2>
+
+          <form
+            class="ist-form"
+            method="POST"
+            action={`mailto:${CONTACT_EMAIL}`}
+            enctype="text/plain"
+            id="contact-form"
+          >
+            <div class="ist-form-group">
+              <label class="ist-form-label" for="cf-name">Nome e cognome *</label>
+              <input
+                class="ist-form-input"
+                type="text"
+                id="cf-name"
+                name="name"
+                required
+                autocomplete="name"
+                placeholder="Mario Rossi"
+              />
+            </div>
+
+            <div class="ist-form-group">
+              <label class="ist-form-label" for="cf-email">Email *</label>
+              <input
+                class="ist-form-input"
+                type="email"
+                id="cf-email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="mario@esempio.it"
+              />
+            </div>
+
+            <div class="ist-form-group">
+              <label class="ist-form-label" for="cf-subject">Oggetto *</label>
+              <select class="ist-form-select" id="cf-subject" name="subject" required>
+                <option value="">Seleziona un argomento…</option>
+                <option value="collaborazione">Proposta di collaborazione</option>
+                <option value="correzione">Segnalazione di errore</option>
+                <option value="domanda">Domanda editoriale</option>
+                <option value="pubblicita">Pubblicità / Sponsorizzazioni</option>
+                <option value="altro">Altro</option>
+              </select>
+            </div>
+
+            <div class="ist-form-group">
+              <label class="ist-form-label" for="cf-message">Messaggio *</label>
+              <textarea
+                class="ist-form-textarea"
+                id="cf-message"
+                name="message"
+                required
+                placeholder="Scrivi il tuo messaggio…"
+                minlength="20"
+              ></textarea>
+            </div>
+
+            <div class="ist-form-group" style="display:flex; align-items:flex-start; gap:10px;">
+              <input type="checkbox" id="cf-privacy" name="privacy" required style="margin-top:3px; accent-color:var(--magenta);" />
+              <label for="cf-privacy" style="font-size:0.85rem; color:var(--contrast-2); line-height:1.5; cursor:pointer;">
+                Ho letto e accetto la <a href="/privacy-policy/" style="color:var(--magenta);">Privacy Policy</a> *
+              </label>
+            </div>
+
+            <button class="ist-btn ist-btn--primary" type="submit">
+              Invia messaggio
+            </button>
+          </form>
+        </div>
+
+        <!-- Contact info -->
+        <div>
+          <h2 style="font-size:1.2rem; font-weight:700; color:var(--navy); margin-bottom:24px;">
+            Altre modalità di contatto
+          </h2>
+
+          <div style="display:flex; flex-direction:column; gap:20px;">
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:24px;">
+              <h3 style="font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px;">
+                Email redazione
+              </h3>
+              <a href={`mailto:${CONTACT_EMAIL}`} style="color:var(--magenta); font-size:0.95rem;">
+                {CONTACT_EMAIL}
+              </a>
+            </div>
+
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:24px;">
+              <h3 style="font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px;">
+                Vuoi scrivere per noi?
+              </h3>
+              <p style="font-size:0.88rem; color:var(--contrast-2); line-height:1.6; margin-bottom:12px;">
+                Sei un professionista della salute e vorresti
+                contribuire con articoli? Raccontaci di te e della tua specializzazione.
+              </p>
+              <a href={`mailto:${CONTACT_EMAIL}?subject=Proposta%20collaborazione`} class="ist-btn ist-btn--secondary" style="font-size:0.85rem; padding:8px 16px;">
+                Proponi collaborazione
+              </a>
+            </div>
+
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:24px;">
+              <h3 style="font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px;">
+                Segnala un errore
+              </h3>
+              <p style="font-size:0.88rem; color:var(--contrast-2); line-height:1.6;">
+                Hai trovato un'imprecisione in un articolo? Ti chiediamo di
+                segnalarcelo: prendiamo l'accuratezza molto sul serio.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  @media (max-width: 640px) {
+    div[style*="grid-template-columns:1fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>

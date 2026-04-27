@@ -69,11 +69,12 @@ const countByTopic: Record<string, number> = {};
 allArticles.forEach((a) => {
   countByTopic[a.data.topic] = (countByTopic[a.data.topic] ?? 0) + 1;
 });
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 ---
 
 <Base
-  title="Argomenti — Insieme Salute Toscana"
-  description="Esplora tutti gli argomenti di Insieme Salute Toscana: relazioni, famiglia, benessere mentale, lavoro, vita digitale, mezza età, adolescenza e salute del corpo."
+  title={`Argomenti — ${siteName}`}
+  description="Esplora tutti gli argomenti."
   canonicalUrl={new URL("/argomento/", Astro.site).toString()}
 >
   <Header />

@@ -24,7 +24,8 @@
     "./pages/*": "./src/pages/*",
     "./styles/*": "./src/styles/*",
     "./content": "./src/content.config.ts",
-    "./scripts/*": "./scripts/*"
+    "./scripts/*": "./scripts/*",
+    "./integration": "./src/integration.ts"
   },
   "peerDependencies": {
     "astro": "^6.1.9",

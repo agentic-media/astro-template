@@ -1,5 +1,5 @@
 /* ============================================================
-   Insieme Salute Toscana — Global Design System
+   Global Design System
    ============================================================ */
 
 /* ------------------------------------------------------------
@@ -216,7 +216,7 @@ p {
   gap: 1px;
 }
 
-.ist-logo__top {
+.ist-logo__insieme {
   font-size: 1.35rem;
   letter-spacing: 0.08em;
   color: #ffffff;
@@ -230,7 +230,7 @@ p {
   text-transform: uppercase;
 }
 
-.ist-logo__bottom {
+.ist-logo__toscana {
   font-size: 0.75rem;
   letter-spacing: 0.22em;
   color: rgba(255, 255, 255, 0.75);
@@ -1138,7 +1138,7 @@ p {
   margin-bottom: 16px;
 }
 
-.ist-footer__brand .ist-logo__top {
+.ist-footer__brand .ist-logo__insieme {
   font-size: 1.2rem;
 }
 

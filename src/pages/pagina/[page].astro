@@ -49,8 +49,8 @@ const canonicalUrl = new URL(`/pagina/${page}/`, Astro.site).toString();
 ---
 
 <Base
-  title={`Articoli — pagina ${page} — Insieme Salute Toscana`}
-  description="Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti."
+  title={`Articoli — pagina ${page} — ${import.meta.env.PUBLIC_SITE_NAME ?? 'Site'}`}
+  description={import.meta.env.PUBLIC_SITE_DESCRIPTION ?? "Articoli."}
   canonicalUrl={canonicalUrl}
 >
   <Header />

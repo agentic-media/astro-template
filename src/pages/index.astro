@@ -32,10 +32,10 @@ const recentArticles = sortedArticles.slice(0, 5).map((a) => ({
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: 'Insieme Salute Toscana',
+  name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
   url: '${Astro.site?.toString().replace(/\/$/,'') ?? 'https://example.com'}',
   description:
-    'Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti.',
+    (import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ''),
   inLanguage: 'it-IT',
   potentialAction: {
     '@type': 'SearchAction',
@@ -49,8 +49,8 @@ const websiteSchema = {
 ---
 
 <Base
-  title="Insieme Salute Toscana"
-  description="Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti per aiutarti a stare meglio ogni giorno."
+  title={import.meta.env.PUBLIC_SITE_NAME ?? "Site"}
+  description={import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ""}
 >
   <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
@@ -61,7 +61,7 @@ const websiteSchema = {
     <div style="background: var(--navy); color: #fff; padding: 40px 0 32px;">
       <div class="ist-container">
         <p style="font-size:0.8rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--magenta); margin-bottom:10px;">
-          Salute psicologica · Toscana
+          {import.meta.env.PUBLIC_SITE_TAGLINE ?? ""}
         </p>
         <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px; max-width:18ch;">
           Stare bene si impara

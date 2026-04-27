@@ -29,7 +29,7 @@ const topicMeta: Record<string, { label: string; description: string }> = {
   lavoro: {
     label: 'Lavoro e identità',
     description:
-      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro. Riflessioni per chi lavora in Toscana e non solo.',
+      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro. Riflessioni.',
   },
   'vita-digitale': {
     label: 'Vita digitale',
@@ -109,7 +109,7 @@ const breadcrumbItems = [
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: `${meta.label} — Insieme Salute Toscana`,
+  name: `${meta.label} — ${import.meta.env.PUBLIC_SITE_NAME ?? 'Site'}`,
   description: meta.description,
   url: `${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`,
   inLanguage: 'it-IT',
@@ -117,7 +117,7 @@ const collectionSchema = {
 ---
 
 <Base
-  title={`${meta.label} — Insieme Salute Toscana`}
+  title={`${meta.label} — ${import.meta.env.PUBLIC_SITE_NAME ?? "Site"}`}
   description={meta.description}
   canonicalUrl={`${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`}
 >

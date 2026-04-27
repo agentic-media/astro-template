@@ -20,7 +20,7 @@ const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.
   <div class="ist-container">
     <div class="ist-header__inner">
       <!-- CSS Wordmark Logo -->
-      <a href="/" class="ist-logo" aria-label="Insieme Salute Toscana - Homepage">
+      <a href="/" class="ist-logo" aria-label={`${siteName} - Homepage`}>
         <span class="ist-logo__top">{logoTop}</span>
         <span class="ist-logo__salute">SALUTE</span>
         <span class="ist-logo__bottom">{logoBottom}</span>

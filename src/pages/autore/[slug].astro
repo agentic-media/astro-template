@@ -75,14 +75,14 @@ const personSchema = {
   url: new URL(`/autore/${data.slug}/`, Astro.site).toString(),
   worksFor: {
     '@type': 'Organization',
-    name: 'Insieme Salute Toscana',
+    name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
     url: Astro.site?.toString() ?? '',
   },
 };
 ---
 
 <Base
-  title={`${data.name} — Insieme Salute Toscana`}
+  title={`${data.name} — ${import.meta.env.PUBLIC_SITE_NAME ?? "Site"}`}
   description={data.bioShort}
   canonicalUrl={new URL(`/autore/${data.slug}/`, Astro.site).toString()}
 >

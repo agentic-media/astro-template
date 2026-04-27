@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Privacy Policy', href: '#' },
+];
+
+const lastUpdated = '2024-01-01';
+const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+---
+
+<Base
+  title=`Privacy Policy — ${siteName}`
+  description="Informativa sulla privacy di ${siteName}: come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali."
+  canonicalUrl={new URL("/privacy-policy/", Astro.site).toString()}
+>
+  <Header />
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container" style="padding-bottom:60px; max-width:760px;">
+      <div class="ist-page-hero">
+        <h1 class="ist-page-hero__title">Privacy Policy</h1>
+        <p style="font-size:0.85rem; color:var(--contrast-3);">
+          Ultimo aggiornamento: {new Intl.DateTimeFormat('it-IT', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(lastUpdated))}
+        </p>
+      </div>
+
+      <div class="ist-single__content" style="background:var(--base-2); border-radius:var(--radius-card); padding:36px;">
+        <h2>1. Titolare del trattamento</h2>
+        <p>
+          Il titolare del trattamento dei dati personali è la redazione di
+          ${siteName}, contattabile all'indirizzo email
+          <a href="mailto:${CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.
+        </p>
+
+        <h2>2. Dati raccolti</h2>
+        <p>
+          Questo sito raccoglie dati di navigazione attraverso Google Analytics (GA4)
+          in forma anonimizzata, al fine di analizzare il traffico e migliorare i
+          contenuti. I dati includono: indirizzo IP (anonimizzato), tipo di browser,
+          sistema operativo, pagine visitate, durata della visita.
+        </p>
+        <p>
+          In caso di invio del modulo di contatto, vengono raccolti: nome, cognome,
+          indirizzo email e il contenuto del messaggio, utilizzati esclusivamente per
+          rispondere alla richiesta.
+        </p>
+
+        <h2>3. Cookie</h2>
+        <p>
+          Questo sito utilizza cookie tecnici necessari al funzionamento e cookie
+          analitici di terze parti (Google Analytics). Per maggiori dettagli,
+          consulta la nostra <a href="/cookie-policy/">Cookie Policy</a>.
+        </p>
+
+        <h2>4. Pubblicità</h2>
+        <p>
+          Questo sito utilizza Google AdSense per la visualizzazione di annunci
+          pubblicitari. Google potrebbe utilizzare cookie per personalizzare gli
+          annunci in base alle tue precedenti visite. Puoi disabilitare questa
+          funzionalità visitando le <a href="https://www.google.com/settings/ads" target="_blank" rel="noopener">impostazioni annunci di Google</a>.
+        </p>
+
+        <h2>5. Diritti dell'interessato</h2>
+        <p>
+          In conformità al Regolamento UE 2016/679 (GDPR), hai diritto di
+          accedere ai tuoi dati, rettificarli, cancellarli, limitarne il
+          trattamento e opporti al trattamento. Per esercitare questi diritti,
+          scrivici a <a href="mailto:${CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.
+        </p>
+
+        <h2>6. Base giuridica</h2>
+        <p>
+          Il trattamento dei dati avviene sulla base del legittimo interesse
+          (per i dati analitici) e del consenso dell'interessato (per i cookie
+          non tecnici e per i dati del modulo di contatto).
+        </p>
+
+        <h2>7. Trasferimento dati</h2>
+        <p>
+          I dati potrebbero essere trasferiti verso paesi terzi (USA) attraverso
+          i servizi di Google LLC. Tali trasferimenti avvengono nel rispetto delle
+          garanzie previste dal GDPR (Standard Contractual Clauses).
+        </p>
+
+        <h2>8. Conservazione</h2>
+        <p>
+          I dati analitici vengono conservati per un massimo di 26 mesi.
+          I dati del modulo di contatto vengono conservati per il tempo necessario
+          a gestire la richiesta e comunque non oltre 12 mesi.
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
