@@ -318,7 +318,7 @@ const pageTitle = isFirstPage
             </nav>
           )}
 
-          {isLastPage && (
+          {isLastPage && siteConfig.integrations.push.enabled && siteConfig.integrations.push.vapidPublicKey && (
             <div class="ist-push-cta" data-no-scroll-snap>
               <div class="ist-push-cta__text">
                 <p class="ist-push-cta__label">Resta aggiornato</p>

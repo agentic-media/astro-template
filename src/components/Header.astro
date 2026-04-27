@@ -10,8 +10,12 @@ interface Props {
   logoMiddle?: string;
   logoBottom?: string;
   siteName?: string;
-  /** Override the env-driven topic list for this render. */
+  /** Override the YAML-driven topic list for this render. */
   topics?: Array<{ slug: string; label: string; description?: string }>;
+  /** Override the YAML-driven primary nav links. */
+  nav?: Array<{ href: string; label: string }>;
+  /** Label for the Argomenti dropdown trigger. */
+  topicsLabel?: string;
 }
 const {
   logoTop = siteConfig.logo.top,
@@ -19,6 +23,8 @@ const {
   logoBottom = siteConfig.logo.bottom,
   siteName = siteConfig.identity.name,
   topics = siteConfig.topics,
+  nav = siteConfig.header.nav,
+  topicsLabel = siteConfig.header.topicsLabel,
 } = Astro.props as Props;
 
 ---
@@ -44,52 +50,47 @@ const {
         ☰
       </button>
 
-      <!-- Navigation -->
+      <!-- Navigation: nav links from YAML in declaration order; the
+           Argomenti dropdown is appended at the end (the nav array
+           shouldn't include /argomento/ — the dropdown is a separate
+           UX element). -->
       <nav class="ist-nav" id="main-nav" aria-label="Navigazione principale">
-        <a
-          href="/"
-          class={currentPath === '/' ? 'active' : ''}
-        >
-          Home
-        </a>
+        {nav.map((item) => {
+          const isActive = item.href === '/'
+            ? currentPath === '/'
+            : currentPath.startsWith(item.href.replace(/\/$/, ''));
+          return (
+            <a href={item.href} class={isActive ? 'active' : ''}>
+              {item.label}
+            </a>
+          );
+        })}
 
-        <a
-          href="/chi-siamo/"
-          class={currentPath.startsWith('/chi-siamo') ? 'active' : ''}
-        >
-          Chi siamo
-        </a>
-
-        <div class="ist-nav__dropdown" id="argomenti-dropdown">
-          <a
-            href="/argomento/"
-            class={`ist-nav__dropdown-toggle ${currentPath.startsWith('/argomento') ? 'active' : ''}`}
-            aria-haspopup="true"
-            aria-expanded="false"
-          >
-            Argomenti
-          </a>
-          <ul class="ist-nav__dropdown-menu" role="menu">
-            {topics.map((topic) => (
-              <li role="none">
-                <a
-                  href={`/argomento/${topic.slug}/`}
-                  role="menuitem"
-                  class={currentPath === `/argomento/${topic.slug}/` ? 'active' : ''}
-                >
-                  {topic.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <a
-          href="/contatti/"
-          class={currentPath.startsWith('/contatti') ? 'active' : ''}
-        >
-          Contatti
-        </a>
+        {topics.length > 0 && (
+          <div class="ist-nav__dropdown" id="argomenti-dropdown">
+            <a
+              href="/argomento/"
+              class={`ist-nav__dropdown-toggle ${currentPath.startsWith('/argomento') ? 'active' : ''}`}
+              aria-haspopup="true"
+              aria-expanded="false"
+            >
+              {topicsLabel}
+            </a>
+            <ul class="ist-nav__dropdown-menu" role="menu">
+              {topics.map((topic) => (
+                <li role="none">
+                  <a
+                    href={`/argomento/${topic.slug}/`}
+                    role="menuitem"
+                    class={currentPath === `/argomento/${topic.slug}/` ? 'active' : ''}
+                  >
+                    {topic.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </nav>
     </div>
   </div>

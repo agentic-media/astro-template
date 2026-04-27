@@ -43,6 +43,16 @@ export const SiteConfigSchema = z.object({
     title: z.string().default('Argomenti'),
     lede: z.string().default(''),
   }).default({}),
+  header: z.object({
+    /** Top-nav links rendered between the logo and the Argomenti
+        dropdown. Empty array = only logo + Argomenti dropdown. */
+    nav: z.array(FooterLinkSchema).default([
+      { href: '/',          label: 'Home' },
+      { href: '/contatti/', label: 'Contatti' },
+    ]),
+    /** Label for the Argomenti dropdown trigger. */
+    topicsLabel: z.string().default('Argomenti'),
+  }).default({}),
   footer: z.object({
     disclaimer: z.string().default(''),
     copyrightHolder: z.string().optional(),
