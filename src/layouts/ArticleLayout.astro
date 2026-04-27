@@ -53,16 +53,20 @@ const hasMultiplePages = totalPages > 1;
 const baseUrl = `/${article.topic}/${article.slug ?? ''}/`;
 const pageUrl = (n: number) => (n === 1 ? baseUrl : `${baseUrl}${n}/`);
 
-const topicLabels: Record<string, string> = {
-  relazioni: 'Relazioni',
-  famiglia: 'Famiglia',
-  'benessere-mentale': 'Benessere mentale',
-  lavoro: 'Lavoro e identità',
-  'vita-digitale': 'Vita digitale',
-  'mezza-eta': 'Mezza età',
-  adolescenza: 'Adolescenza e giovani',
-  'salute-corpo': 'Salute e corpo',
-};
+// Build topic-slug → display-label map from the per-site env JSON.
+function readTopics(): Array<{ slug: string; label: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [];
+}
+const topicLabels: Record<string, string> = Object.fromEntries(
+  readTopics().map((t) => [t.slug, t.label])
+);
 
 const topicLabel = topicLabels[article.topic] ?? article.topic;
 

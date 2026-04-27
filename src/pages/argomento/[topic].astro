@@ -10,61 +10,36 @@ import { getCollection } from 'astro:content';
 
 const ARTICLES_PER_PAGE = 12;
 
-const topicMeta: Record<string, { label: string; description: string }> = {
-  relazioni: {
-    label: 'Relazioni e comunicazione',
-    description:
-      'Come costruire e coltivare relazioni sane, comunicare meglio con il partner, amici e colleghi. Articoli scritti da psicologi esperti in relazioni interpersonali.',
-  },
-  famiglia: {
-    label: 'Famiglia e genitorialità',
-    description:
-      'Genitorialità consapevole, dinamiche familiari, adolescenza in famiglia. Consigli pratici per famiglie toscane da professionisti locali.',
-  },
-  'benessere-mentale': {
-    label: 'Benessere mentale',
-    description:
-      'Ansia, stress, autostima, mindfulness: strumenti concreti per la tua salute psicologica quotidiana.',
-  },
-  lavoro: {
-    label: 'Lavoro e identità',
-    description:
-      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro. Riflessioni.',
-  },
-  'vita-digitale': {
-    label: 'Vita digitale',
-    description:
-      'Social media, dipendenze digitali, relazioni online: come navigare il mondo connesso con consapevolezza e salute mentale.',
-  },
-  'mezza-eta': {
-    label: 'Mezza età',
-    description:
-      'Crisi di mezza età, bilanci di vita, nuovi inizi: riflessioni per chi si trova a un crocevia tra passato e futuro.',
-  },
-  adolescenza: {
-    label: 'Adolescenza e giovani',
-    description:
-      'Crescita emotiva, identità giovanile, sfide dell\'adolescenza vista da dentro e da fuori, per ragazzi e per i loro genitori.',
-  },
-  'salute-corpo': {
-    label: 'Salute e corpo',
-    description:
-      'Il legame tra mente e corpo: sonno, alimentazione, movimento fisico e benessere psicologico. Scienza accessibile e applicabile.',
-  },
-};
+// Per-site topic taxonomy comes from PUBLIC_SITE_TOPICS — a JSON
+// array of { slug, label, description? }.
+function readTopics(): Array<{ slug: string; label: string; description?: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { slug: 'argomento-1', label: 'Argomento 1', description: '' },
+  ];
+}
+const SITE_TOPICS = readTopics();
+const topicMeta: Record<string, { label: string; description: string }> = Object.fromEntries(
+  SITE_TOPICS.map((t) => [t.slug, { label: t.label, description: t.description ?? '' }])
+);
 
 export async function getStaticPaths() {
-  const slugs = Object.keys({
-    relazioni: 1,
-    famiglia: 1,
-    'benessere-mentale': 1,
-    lavoro: 1,
-    'vita-digitale': 1,
-    'mezza-eta': 1,
-    adolescenza: 1,
-    'salute-corpo': 1,
-  });
-
+  // Re-read inside getStaticPaths since Astro evaluates it in an
+  // isolated context that doesn't see top-level frontmatter vars.
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  let slugs: string[] = ['argomento-1'];
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) slugs = parsed.map((t: any) => t.slug).filter(Boolean);
+    } catch { /* ignore */ }
+  }
   return slugs.map((topic) => ({ params: { topic } }));
 }
 

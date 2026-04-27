@@ -12,18 +12,26 @@ export interface Props {
   activeTopic?: string;
 }
 
-const { recentArticles = [], activeTopic } = Astro.props;
+function readTopics(): Array<{ slug: string; label: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { slug: 'argomento-1', label: 'Argomento 1' },
+    { slug: 'argomento-2', label: 'Argomento 2' },
+    { slug: 'argomento-3', label: 'Argomento 3' },
+  ];
+}
 
-const topics = [
-  { slug: 'relazioni', label: 'Relazioni' },
-  { slug: 'famiglia', label: 'Famiglia' },
-  { slug: 'benessere-mentale', label: 'Benessere mentale' },
-  { slug: 'lavoro', label: 'Lavoro' },
-  { slug: 'vita-digitale', label: 'Vita digitale' },
-  { slug: 'mezza-eta', label: 'Mezza età' },
-  { slug: 'adolescenza', label: 'Adolescenza' },
-  { slug: 'salute-corpo', label: 'Salute e corpo' },
-];
+const { recentArticles = [], activeTopic, topics = readTopics() } = Astro.props as {
+  recentArticles?: RecentArticle[];
+  activeTopic?: string;
+  topics?: Array<{ slug: string; label: string }>;
+};
 
 function formatDate(dateStr: string) {
   return new Intl.DateTimeFormat('it-IT', {
