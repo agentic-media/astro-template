@@ -10,18 +10,23 @@ export interface Props {
 
 const { items } = Astro.props;
 
-// Build JSON-LD BreadcrumbList schema
+// Build JSON-LD BreadcrumbList schema. Skip entries without an href
+// (commonly the current page, where consumers pass `{label: 'Foo'}`
+// or `{label: 'Foo', href: '#'}` — the latter is correct, the former
+// would crash without this guard).
 const schema = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
-  itemListElement: items.map((item, index) => ({
-    '@type': 'ListItem',
-    position: index + 1,
-    name: item.label,
-    item: item.href.startsWith('http')
-      ? item.href
-      : new URL(item.href, Astro.site).toString(),
-  })),
+  itemListElement: items
+    .filter((item) => item.href && item.href !== '#')
+    .map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.label,
+      item: item.href.startsWith('http')
+        ? item.href
+        : new URL(item.href, Astro.site).toString(),
+    })),
 };
 ---
 

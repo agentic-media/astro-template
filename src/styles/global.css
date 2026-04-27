@@ -216,7 +216,7 @@ p {
   gap: 1px;
 }
 
-.ist-logo__insieme {
+.ist-logo__top {
   font-size: 1.35rem;
   letter-spacing: 0.08em;
   color: #ffffff;
@@ -230,7 +230,7 @@ p {
   text-transform: uppercase;
 }
 
-.ist-logo__toscana {
+.ist-logo__bottom {
   font-size: 0.75rem;
   letter-spacing: 0.22em;
   color: rgba(255, 255, 255, 0.75);
@@ -288,12 +288,16 @@ p {
 .ist-nav__dropdown-menu {
   display: none;
   position: absolute;
-  top: calc(100% + 4px);
+  /* Sit flush with the toggle (no `top: calc(100% + Npx)` gap, that
+     breaks hover when the cursor crosses the gap). The visual gap
+     comes from `padding-top` so the hover area stays contiguous. */
+  top: 100%;
   left: 0;
   background: var(--navy);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-cta);
-  padding: 6px 0;
+  padding: 10px 0 6px;          /* extra top padding == visual gap, hoverable */
+  margin-top: -2px;             /* tiny overlap with the toggle to seal the hover bridge */
   min-width: 220px;
   z-index: 100;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
@@ -301,6 +305,23 @@ p {
 
 .ist-nav__dropdown:hover .ist-nav__dropdown-menu,
 .ist-nav__dropdown:focus-within .ist-nav__dropdown-menu {
+  display: block;
+}
+
+/* Invisible hover bridge — keeps the parent :hover satisfied when the
+   cursor hovers over the visual gap between the toggle and the menu.
+   Sized to cover the visible padding only; doesn't capture clicks. */
+.ist-nav__dropdown::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  height: 12px;
+  width: 100%;
+  display: none;
+}
+.ist-nav__dropdown:hover::after,
+.ist-nav__dropdown:focus-within::after {
   display: block;
 }
 
