@@ -14,9 +14,9 @@ interface Props {
   topics?: Array<{ slug: string; label: string; description?: string }>;
 }
 const {
-  logoTop = 'BRAND',
-  logoMiddle = '',
-  logoBottom = 'TEMPLATE',
+  logoTop = siteConfig.logo.top,
+  logoMiddle = siteConfig.logo.middle,
+  logoBottom = siteConfig.logo.bottom,
   siteName = siteConfig.identity.name,
   topics = siteConfig.topics,
 } = Astro.props as Props;

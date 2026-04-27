@@ -21,9 +21,9 @@ interface Props {
   linksTitle?: string;
 }
 const {
-  logoTop = 'BRAND',
-  logoMiddle = '',
-  logoBottom = 'TEMPLATE',
+  logoTop = siteConfig.logo.top,
+  logoMiddle = siteConfig.logo.middle,
+  logoBottom = siteConfig.logo.bottom,
   siteName = siteConfig.identity.name,
   siteDescription = siteConfig.identity.description,
   topics = siteConfig.topics,
