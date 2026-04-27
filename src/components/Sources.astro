@@ -1,0 +1,45 @@
+---
+import SourceCard from './SourceCard.astro';
+import { createHash } from 'node:crypto';
+
+export interface Props {
+  items: { url: string; title?: string; siteName?: string }[];
+}
+
+const { items } = Astro.props;
+
+// Load OG cache; tolerate it not existing yet
+let cache: Record<string, any> = {};
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const mod = await import('../data/sources-cache.json');
+  cache = (mod as any).default ?? mod;
+} catch {
+  cache = {};
+}
+
+function urlKey(url: string) {
+  return createHash('sha1').update(url).digest('hex').slice(0, 16);
+}
+
+const enriched = items.map((item) => {
+  const cached = cache[urlKey(item.url)];
+  return {
+    url: item.url,
+    title: cached?.ok ? cached.title : null,
+    description: cached?.ok ? cached.description : null,
+    image: cached?.ok ? cached.image : null,
+    siteName: cached?.ok ? cached.siteName : null,
+    fallback: { title: item.title, siteName: item.siteName },
+  };
+});
+---
+
+<div class="ist-sources">
+  <header class="ist-sources__header">
+    <p class="ist-sources__label">Fonti</p>
+    <h2 class="ist-sources__title">Le ricerche e gli articoli citati</h2>
+  </header>
+
+  {enriched.map((item) => <SourceCard {...item} />)}
+</div>

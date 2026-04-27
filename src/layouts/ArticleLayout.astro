@@ -1,0 +1,383 @@
+---
+import Base from './Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import AuthorBox from '../components/AuthorBox.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Sources from '../components/Sources.astro';
+import TagPill from '../components/TagPill.astro';
+import { getCollection } from 'astro:content';
+
+export interface ArticleFrontmatter {
+  title: string;
+  description: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  publishedDate: string;
+  modifiedDate?: string;
+  author: string;
+  authorSlug: string;
+  tags: string[];
+  topic: string;
+  heroImage?: string;
+  heroImageAlt?: string;
+  sources?: { url: string; title?: string; siteName?: string }[];
+  slug?: string;
+  currentPage?: number;
+  totalPages?: number;
+  prevArticle?: { title: string; slug: string; topic: string } | null;
+  nextArticle?: {
+    title: string;
+    slug: string;
+    excerpt?: string;
+    heroImage?: string;
+    topic?: string;
+  } | null;
+}
+
+export interface Props {
+  article: ArticleFrontmatter;
+  /** Pre-rendered HTML for the current page's body (markdown → HTML) */
+  pageHtml: string;
+}
+
+const { article, pageHtml } = Astro.props;
+
+const currentPage = article.currentPage ?? 1;
+const totalPages = article.totalPages ?? 1;
+const isFirstPage = currentPage === 1;
+const isLastPage = currentPage === totalPages;
+const hasMultiplePages = totalPages > 1;
+
+const baseUrl = `/${article.topic}/${article.slug ?? ''}/`;
+const pageUrl = (n: number) => (n === 1 ? baseUrl : `${baseUrl}${n}/`);
+
+const topicLabels: Record<string, string> = {
+  relazioni: 'Relazioni',
+  famiglia: 'Famiglia',
+  'benessere-mentale': 'Benessere mentale',
+  lavoro: 'Lavoro e identità',
+  'vita-digitale': 'Vita digitale',
+  'mezza-eta': 'Mezza età',
+  adolescenza: 'Adolescenza e giovani',
+  'salute-corpo': 'Salute e corpo',
+};
+
+const topicLabel = topicLabels[article.topic] ?? article.topic;
+
+const authors = await getCollection('authors');
+const authorData = authors.find(
+  (a) => a.id === article.authorSlug || a.data.slug === article.authorSlug
+);
+
+function getInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0]?.toUpperCase() ?? '')
+    .join('');
+}
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat('it-IT', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(dateStr));
+}
+
+const authorInitials = getInitials(article.author);
+const hasSources = (article.sources?.length ?? 0) > 0;
+
+// Sidebar data
+const allArticles = await getCollection('articles');
+const recentArticles = allArticles
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  )
+  .slice(0, 5)
+  .map((a) => ({
+    title: a.data.title,
+    slug: a.id,
+    image: a.data.heroImage,
+    date: a.data.publishedDate,
+    topic: a.data.topic,
+  }));
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: topicLabel, href: `/argomento/${article.topic}/` },
+  { label: article.title, href: '#' },
+];
+
+// Canonical URL: page 1 is the canonical for the whole article series;
+// subsequent pages get rel="canonical" pointing to themselves but also
+// rel="prev"/"next" so search engines understand the pagination.
+const canonical = new URL(pageUrl(currentPage), Astro.site).toString();
+const prevPageHref = !isFirstPage ? new URL(pageUrl(currentPage - 1), Astro.site).toString() : null;
+const nextPageHref = !isLastPage ? new URL(pageUrl(currentPage + 1), Astro.site).toString() : null;
+
+// JSON-LD Article schema
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: article.title,
+  description: article.description,
+  image: article.heroImage ?? null,
+  datePublished: article.publishedDate,
+  dateModified: article.modifiedDate ?? article.publishedDate,
+  author: {
+    '@type': 'Person',
+    name: article.author,
+    url: new URL(`/autore/${article.authorSlug}/`, Astro.site).toString(),
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'Insieme Salute Toscana',
+    url: Astro.site?.toString() ?? '',
+    logo: {
+      '@type': 'ImageObject',
+      url: new URL('/logo.png', Astro.site).toString(),
+    },
+  },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  isPartOf: hasMultiplePages
+    ? {
+        '@type': 'CreativeWork',
+        name: article.title,
+        url: new URL(baseUrl, Astro.site).toString(),
+      }
+    : undefined,
+};
+
+// Title: append " — Pagina N" on subsequent pages so SERP shows the page
+const pageTitle = isFirstPage
+  ? article.ogTitle ?? article.title
+  : `${article.ogTitle ?? article.title} — Pagina ${currentPage}`;
+---
+
+<Base
+  title={pageTitle}
+  description={article.ogDescription ?? article.description}
+  canonicalUrl={canonical}
+  ogImage={article.heroImage}
+  publishedTime={article.publishedDate}
+  modifiedTime={article.modifiedDate}
+  authorName={article.author}
+  type="article"
+  prevPageHref={prevPageHref}
+  nextPageHref={nextPageHref}
+>
+  <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+
+  <Header />
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container">
+      <div class="ist-article-cols">
+        <article class="ist-single" itemscope itemtype="https://schema.org/Article">
+          {isFirstPage ? (
+            <header class="ist-single__cover">
+              {article.heroImage ? (
+                <img
+                  class="ist-single__hero"
+                  src={article.heroImage}
+                  alt={article.heroImageAlt ?? article.title}
+                  loading="eager"
+                  itemprop="image"
+                />
+              ) : (
+                <div class="ist-single__hero ist-single__hero--empty" aria-hidden="true">🌿</div>
+              )}
+
+              <div class="ist-single__cover-body">
+                <a class="ist-single__topic" href={`/argomento/${article.topic}/`}>
+                  {topicLabel}
+                </a>
+
+                <h1 class="ist-single__title" itemprop="headline">
+                  {article.title}
+                </h1>
+
+                <p class="ist-single__excerpt" itemprop="description">
+                  {article.description}
+                </p>
+
+                <div class="ist-single__meta">
+                  {authorData?.data.avatar ? (
+                    <img
+                      class="ist-single__avatar"
+                      src={authorData.data.avatar}
+                      alt={`Foto di ${article.author}`}
+                      width="40"
+                      height="40"
+                    />
+                  ) : (
+                    <span class="ist-single__avatar ist-single__avatar--initials" aria-hidden="true">
+                      {authorInitials}
+                    </span>
+                  )}
+                  <div class="ist-single__meta-text">
+                    <a class="ist-single__author" href={`/autore/${article.authorSlug}/`}>
+                      {article.author}
+                    </a>
+                    <time
+                      class="ist-single__date"
+                      datetime={article.publishedDate}
+                      itemprop="datePublished"
+                    >
+                      {formatDate(article.publishedDate)}
+                    </time>
+                  </div>
+                </div>
+
+                {article.tags.length > 0 && (
+                  <div class="ist-single__tags">
+                    {article.tags.map((tag) => (
+                      <TagPill tag={tag} topic={article.topic} />
+                    ))}
+                  </div>
+                )}
+              </div>
+            </header>
+          ) : (
+            <header class="ist-single__cover ist-single__cover--slim">
+              <div class="ist-single__slim-meta">
+                <a class="ist-single__topic" href={`/argomento/${article.topic}/`}>
+                  {topicLabel}
+                </a>
+                <span class="ist-single__page-counter">Pagina {currentPage} di {totalPages}</span>
+              </div>
+              <h1 class="ist-single__title-slim" itemprop="headline">
+                <a href={pageUrl(1)}>{article.title}</a>
+              </h1>
+            </header>
+          )}
+
+          <!-- Top in-content ad slot. AdSense Auto Ads will fill, or
+               we can place an explicit <ins class="adsbygoogle"> here. -->
+          <div class="ist-ad-slot ist-ad-slot--top" data-ad-position="top" aria-hidden="true"></div>
+
+          <div
+            class="ist-single__body"
+            itemprop="articleBody"
+            set:html={pageHtml}
+          />
+
+          <!-- Mid in-content ad slot, just below the body and above
+               the page nav / sources. -->
+          <div class="ist-ad-slot ist-ad-slot--mid" data-ad-position="mid" aria-hidden="true"></div>
+
+          {hasMultiplePages && (
+            <nav class="ist-page-nav" aria-label="Paginazione articolo">
+              {!isLastPage ? (
+                <a class="ist-page-nav__cta" href={pageUrl(currentPage + 1)} rel="next">
+                  <span class="ist-page-nav__cta-label">Continua a leggere</span>
+                  <span class="ist-page-nav__cta-detail">
+                    Pagina {currentPage + 1} di {totalPages}
+                  </span>
+                  <span class="ist-page-nav__cta-arrow" aria-hidden="true">→</span>
+                </a>
+              ) : (
+                <p class="ist-page-nav__finished">
+                  <span class="ist-page-nav__finished-mark" aria-hidden="true">✓</span>
+                  Fine dell'articolo · {totalPages} pagine
+                </p>
+              )}
+
+              <div class="ist-page-nav__row">
+                {!isFirstPage ? (
+                  <a class="ist-page-nav__prev" href={pageUrl(currentPage - 1)} rel="prev">
+                    ← Pagina precedente
+                  </a>
+                ) : (
+                  <span />
+                )}
+
+                <ol class="ist-page-nav__pages">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+                    n === currentPage ? (
+                      <li class="ist-page-nav__page is-current" aria-current="page">{n}</li>
+                    ) : (
+                      <li><a class="ist-page-nav__page" href={pageUrl(n)}>{n}</a></li>
+                    )
+                  ))}
+                </ol>
+
+                {!isLastPage ? (
+                  <a class="ist-page-nav__next-text" href={pageUrl(currentPage + 1)} rel="next">
+                    Pagina successiva →
+                  </a>
+                ) : (
+                  <span />
+                )}
+              </div>
+            </nav>
+          )}
+
+          {isLastPage && (
+            <div class="ist-push-cta" data-no-scroll-snap>
+              <div class="ist-push-cta__text">
+                <p class="ist-push-cta__label">Resta aggiornato</p>
+                <p class="ist-push-cta__title">Ricevi un avviso quando esce un nuovo articolo.</p>
+              </div>
+              <button type="button" class="ist-push-cta__btn" data-ist-push-open>
+                Iscriviti agli aggiornamenti
+              </button>
+            </div>
+          )}
+
+          {isLastPage && hasSources && (
+            <Sources items={article.sources!} />
+          )}
+
+          {isLastPage && authorData && (
+            <AuthorBox
+              name={authorData.data.name}
+              bio={authorData.data.bio ?? authorData.data.bioShort}
+              slug={authorData.data.slug}
+              avatar={authorData.data.avatar}
+              jobTitle={authorData.data.title}
+            />
+          )}
+
+          <!-- Bottom ad slot, just before related navigation. -->
+          <div class="ist-ad-slot ist-ad-slot--bottom" data-ad-position="bottom" aria-hidden="true"></div>
+
+          {isLastPage && (article.prevArticle || article.nextArticle) && (
+            <nav class="ist-post-nav" aria-label="Navigazione articoli">
+              {article.prevArticle ? (
+                <a class="ist-post-nav__item ist-post-nav__item--prev" href={`/${article.prevArticle.topic}/${article.prevArticle.slug}/`}>
+                  <span class="ist-post-nav__label">← Articolo precedente</span>
+                  <span class="ist-post-nav__title">{article.prevArticle.title}</span>
+                </a>
+              ) : (
+                <div />
+              )}
+              {article.nextArticle && (
+                <a class="ist-post-nav__item ist-post-nav__item--next" href={`/${article.nextArticle.topic}/${article.nextArticle.slug}/`}>
+                  <span class="ist-post-nav__label">Articolo successivo →</span>
+                  <span class="ist-post-nav__title">{article.nextArticle.title}</span>
+                </a>
+              )}
+            </nav>
+          )}
+        </article>
+
+        <aside class="ist-article-cols__sidebar" aria-label="Barra laterale">
+          <Sidebar recentArticles={recentArticles} activeTopic={article.topic} />
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

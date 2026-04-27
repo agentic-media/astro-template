@@ -1,0 +1,35 @@
+name = "site-push"
+main = "index.js"
+compatibility_date = "2025-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Three KV bindings: one main store keyed by SHA-1(endpoint), and two
+# secondary indexes for fast topic fan-out. Create them with:
+#   npx wrangler kv namespace create IST_PUSH_SUBS
+#   npx wrangler kv namespace create IST_PUSH_TOPIC_INDEX
+# Then paste the IDs below.
+[[kv_namespaces]]
+binding = "SUBS"
+id = "REPLACE_WITH_KV_ID"
+
+[[kv_namespaces]]
+binding = "TOPIC_INDEX"
+id = "REPLACE_WITH_KV_ID"
+
+# Routes are configured in the Cloudflare Pages project so that
+# /api/push/* paths hit this Worker. Alternative: deploy as a
+# standalone worker on push.EXAMPLE_DOMAIN.example and point the
+# IST_PUSH_CONFIG.pushApi at the absolute URL.
+[[routes]]
+pattern = "EXAMPLE_DOMAIN.example/api/push/*"
+zone_name = "EXAMPLE_DOMAIN.example"
+
+# Daily housekeeping: prune subscriptions whose endpoint returns 410.
+[triggers]
+crons = ["0 3 * * *"]
+
+# Secrets (set via `wrangler secret put`):
+#   VAPID_PUBLIC_KEY    — same value as PUBLIC_VAPID_KEY in Pages env
+#   VAPID_PRIVATE_KEY   — generate once with `npx web-push generate-vapid-keys`
+#   VAPID_SUBJECT       — e.g. "mailto:admin@example.com"
+#   ADMIN_TOKEN         — bearer token required to POST /api/push/send

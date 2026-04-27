@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import Sidebar from '../components/Sidebar.astro';
+import Pagination from '../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const ARTICLES_PER_PAGE = 12;
+
+const allArticles = await getCollection('articles');
+const sortedArticles = allArticles.sort(
+  (a, b) =>
+    new Date(b.data.publishedDate).getTime() -
+    new Date(a.data.publishedDate).getTime()
+);
+
+const totalPages = Math.ceil(sortedArticles.length / ARTICLES_PER_PAGE);
+const currentPage = 1;
+const articles = sortedArticles.slice(0, ARTICLES_PER_PAGE);
+
+const recentArticles = sortedArticles.slice(0, 5).map((a) => ({
+  title: a.data.title,
+  slug: a.id,
+  image: a.data.heroImage,
+  date: a.data.publishedDate,
+  topic: a.data.topic,
+}));
+
+// WebSite JSON-LD schema
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Insieme Salute Toscana',
+  url: '${Astro.site?.toString().replace(/\/$/,'') ?? 'https://example.com'}',
+  description:
+    'Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti.',
+  inLanguage: 'it-IT',
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: '${Astro.site?.toString().replace(/\/$/,'') ?? 'https://example.com'}/cerca/?q={search_term_string}',
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+---
+
+<Base
+  title="Insieme Salute Toscana"
+  description="Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti per aiutarti a stare meglio ogni giorno."
+>
+  <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
+
+  <Header />
+
+  <main>
+    <!-- Homepage hero strip -->
+    <div style="background: var(--navy); color: #fff; padding: 40px 0 32px;">
+      <div class="ist-container">
+        <p style="font-size:0.8rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--magenta); margin-bottom:10px;">
+          Salute psicologica · Toscana
+        </p>
+        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px; max-width:18ch;">
+          Stare bene si impara
+        </h1>
+        <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6; font-size:1.05rem;">
+          Articoli scritti da psicologi e professionisti della salute per aiutarti a
+          capire le tue emozioni, migliorare le relazioni e prenderti cura di te.
+        </p>
+      </div>
+    </div>
+
+    <div class="ist-container" style="padding-top:40px; padding-bottom:60px;">
+      <div class="ist-layout-2col">
+        <!-- Articles main column -->
+        <div>
+          {articles.length > 0 ? (
+            <div class="ist-card-grid">
+              {articles.map((article) => (
+                <ArticleCard
+                  title={article.data.title}
+                  slug={article.id}
+                  excerpt={article.data.description}
+                  image={article.data.heroImage}
+                  date={article.data.publishedDate}
+                  author={article.data.author}
+                  authorSlug={article.data.authorSlug}
+                  tags={article.data.tags}
+                  topic={article.data.topic}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:48px; text-align:center; color:var(--contrast-2);">
+              <p style="font-size:1.1rem; margin-bottom:8px;">Nessun articolo ancora pubblicato.</p>
+              <p style="font-size:0.9rem;">Torna presto — i nostri esperti stanno scrivendo per te.</p>
+            </div>
+          )}
+
+          <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/" />
+        </div>
+
+        <!-- Sidebar -->
+        <aside aria-label="Barra laterale">
+          <Sidebar recentArticles={recentArticles} />
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

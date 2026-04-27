@@ -1,0 +1,27 @@
+---
+export interface Props {
+  /** The quote text. The component wraps it in « … » automatically. */
+  text: string;
+  /** Small caption shown below the quote (e.g. "Pagina 1 di 2 · continua") */
+  caption?: string;
+}
+
+const { text, caption } = Astro.props;
+---
+
+<section
+  class="ist-reader__page ist-reader__page--pull"
+  data-reader-page
+  data-reader-page-kind="pull"
+>
+  <div class="ist-reader__page-inner">
+    <p class="ist-reader__pull-label">Estratto</p>
+    <blockquote class="ist-reader__pull-quote">«{text}»</blockquote>
+    {caption && (
+      <p class="ist-reader__pull-caption">
+        <span class="ist-reader__pull-rule" aria-hidden="true"></span>
+        {caption}
+      </p>
+    )}
+  </div>
+</section>

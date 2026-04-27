@@ -1,0 +1,17 @@
+---
+export interface Props {
+  tag: string;
+  topic?: string;
+}
+
+const { tag, topic } = Astro.props;
+
+// Build URL: if topic provided, link to topic page with tag filter; otherwise generic tag page
+const href = topic
+  ? `/argomento/${topic}/?tag=${encodeURIComponent(tag)}`
+  : `/tag/${encodeURIComponent(tag)}/`;
+---
+
+<a href={href} class="ist-tag" rel="tag">
+  {tag}
+</a>

@@ -1,0 +1,51 @@
+---
+export interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath: string;
+}
+
+const { currentPage, totalPages, basePath } = Astro.props;
+
+function pageHref(page: number): string {
+  if (page === 1) return basePath;
+  return `${basePath}pagina/${page}/`;
+}
+
+const prevPage = currentPage > 1 ? currentPage - 1 : null;
+const nextPage = currentPage < totalPages ? currentPage + 1 : null;
+
+const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+---
+
+{totalPages > 1 && (
+  <nav class="ist-pagination" aria-label="Paginazione">
+    {prevPage ? (
+      <a class="ist-pagination__item" href={pageHref(prevPage)} rel="prev">
+        ← Indietro
+      </a>
+    ) : (
+      <span class="ist-pagination__item ist-pagination__item--disabled" aria-hidden="true">
+        ← Indietro
+      </span>
+    )}
+
+    {pages.map((page) =>
+      page === currentPage ? (
+        <span class="ist-pagination__item current" aria-current="page">{page}</span>
+      ) : (
+        <a class="ist-pagination__item" href={pageHref(page)}>{page}</a>
+      )
+    )}
+
+    {nextPage ? (
+      <a class="ist-pagination__item" href={pageHref(nextPage)} rel="next">
+        Avanti →
+      </a>
+    ) : (
+      <span class="ist-pagination__item ist-pagination__item--disabled" aria-hidden="true">
+        Avanti →
+      </span>
+    )}
+  </nav>
+)}

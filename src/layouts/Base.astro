@@ -1,0 +1,196 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+  publishedTime?: string;
+  modifiedTime?: string;
+  authorName?: string;
+  type?: 'website' | 'article';
+  /** Optional class added to <body>. Used to scope mobile-fullscreen reader. */
+  bodyClass?: string;
+  /** Pagination relationships for multi-page articles */
+  prevPageHref?: string | null;
+  nextPageHref?: string | null;
+}
+
+const {
+  title,
+  description,
+  canonicalUrl,
+  ogImage = '/og-default.jpg',
+  publishedTime,
+  modifiedTime,
+  authorName,
+  type = 'website',
+  bodyClass,
+  prevPageHref,
+  nextPageHref,
+} = Astro.props;
+
+const siteName = 'Insieme Salute Toscana';
+const canonical = canonicalUrl ?? Astro.url.href;
+const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
+
+// Push-notification client config — resolved at build time from env.
+// Set PUBLIC_VAPID_KEY in Cloudflare Pages env vars for the Worker to
+// pair with. PUBLIC_PUSH_API defaults to /api/push/subscribe (handled
+// by the Cloudflare Worker route).
+const pushConfig = {
+  vapidPublicKey: import.meta.env.PUBLIC_VAPID_KEY ?? '',
+  pushApi: import.meta.env.PUBLIC_PUSH_API ?? '/api/push/subscribe',
+};
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Primary Meta -->
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {prevPageHref && <link rel="prev" href={prevPageHref} />}
+    {nextPageHref && <link rel="next" href={nextPageHref} />}
+
+    <!-- Font Preloads -->
+    <link
+      rel="preload"
+      href="/fonts/blinker-700-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="preload"
+      href="/fonts/blinker-600-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:type" content={type} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:site_name" content={siteName} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+    {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
+    {authorName && <meta property="article:author" content={authorName} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+
+    <!-- PWA manifest (required by iOS Safari for Web Push) -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0c1a3a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Insieme" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Google Consent Mode v2 — default-deny everything except security_storage.
+         MUST run before any Google script loads. Cookie consent JS will
+         re-issue an 'update' once the user makes a choice (or restores their
+         saved state on a return visit). -->
+    <script is:inline>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      window.gtag = window.gtag || gtag;
+      gtag('consent', 'default', {
+        ad_storage:              'denied',
+        ad_user_data:            'denied',
+        ad_personalization:      'denied',
+        analytics_storage:       'denied',
+        functionality_storage:   'denied',
+        personalization_storage: 'denied',
+        security_storage:        'granted',
+      });
+    </script>
+
+    <!-- Cookie consent config + script -->
+    <script is:inline define:vars={{ IST_CONSENT_CONFIG: {
+      version: 1,
+      cookieName: 'ist_consent',
+      storageKey: 'ist_consent',
+      policyUrl: '/cookie-policy/',
+      privacyUrl: '/privacy-policy/',
+      categories: {
+        necessary: {
+          required: true,
+          label: 'Necessari',
+          description: 'Indispensabili per il funzionamento del sito. Non raccolgono dati personali e non richiedono consenso.',
+        },
+        preferences: {
+          required: false,
+          label: 'Preferenze',
+          description: 'Memorizzano preferenze e abilitano contenuti incorporati da terze parti (es. video YouTube, Google Maps). Dati trattati in USA da Google LLC.',
+        },
+        analytics: {
+          required: false,
+          label: 'Analitici',
+          description: 'Misurano traffico e comportamento degli utenti tramite Google Analytics 4. Dati trattati in USA da Google LLC.',
+        },
+        marketing: {
+          required: false,
+          label: 'Marketing',
+          description: 'Attivano pubblicità personalizzata e remarketing tramite Google Ads e Facebook Pixel. Dati trattati in USA.',
+        },
+      },
+      texts: {
+        title: 'Preferenze privacy',
+        description: 'Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per finalità analitiche (Google Analytics) e di marketing (Google Ads). Puoi liberamente prestare, rifiutare o revocare il consenso in qualsiasi momento.',
+        acceptAll: 'Accetta tutto',
+        rejectAll: 'Rifiuta tutto',
+        customize: 'Personalizza',
+        save: 'Salva e chiudi',
+        settings: 'Impostazioni cookie',
+      },
+    } }}>
+      window.IST_CONSENT_CONFIG = IST_CONSENT_CONFIG;
+    </script>
+    <script src="/consent.js" defer></script>
+
+    <!-- Push notifications opt-in. VAPID public key is wired at deploy time
+         via PUBLIC_VAPID_KEY in Cloudflare env vars (see workers/push/README). -->
+    <script is:inline define:vars={{ IST_PUSH_CONFIG: pushConfig }}>
+      window.IST_PUSH_CONFIG = IST_PUSH_CONFIG;
+    </script>
+    <script src="/push.js" defer></script>
+
+    <!-- Google Adsense -->
+    <script
+      async
+      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4406471352837356"
+      crossorigin="anonymous"
+    ></script>
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4CM2EFKR7"
+    ></script>
+    <script is:inline>
+      gtag('js', new Date());
+      gtag('config', 'G-V4CM2EFKR7');
+    </script>
+  </head>
+  <body class={bodyClass}>
+    <slot />
+    <div id="ist-consent-root"></div>
+  </body>
+</html>

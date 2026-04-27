@@ -1,0 +1,21 @@
+---
+export interface Props {
+  /** Page variant. Drives background and styling. */
+  kind?: 'text' | 'pull' | 'cover' | 'next' | 'sources' | 'media';
+  /** Optional accent label shown at the top of the page (e.g. topic name) */
+  label?: string;
+}
+
+const { kind = 'text', label } = Astro.props;
+---
+
+<section
+  class="ist-reader__page"
+  data-reader-page
+  data-reader-page-kind={kind}
+>
+  <div class="ist-reader__page-inner">
+    {label && <p class="ist-reader__page-label">{label}</p>}
+    <slot />
+  </div>
+</section>

@@ -1,0 +1,182 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import Header from '../../../../components/Header.astro';
+import Footer from '../../../../components/Footer.astro';
+import ArticleCard from '../../../../components/ArticleCard.astro';
+import Sidebar from '../../../../components/Sidebar.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
+import Pagination from '../../../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const ARTICLES_PER_PAGE = 12;
+
+const topicMeta: Record<string, { label: string; description: string }> = {
+  relazioni: {
+    label: 'Relazioni e comunicazione',
+    description:
+      'Come costruire e coltivare relazioni sane, comunicare meglio con il partner, amici e colleghi. Articoli scritti da psicologi esperti in relazioni interpersonali.',
+  },
+  famiglia: {
+    label: 'Famiglia e genitorialità',
+    description:
+      'Genitorialità consapevole, dinamiche familiari, adolescenza in famiglia. Consigli pratici per famiglie toscane da professionisti locali.',
+  },
+  'benessere-mentale': {
+    label: 'Benessere mentale',
+    description:
+      'Ansia, stress, autostima, mindfulness: strumenti concreti per la tua salute psicologica quotidiana.',
+  },
+  lavoro: {
+    label: 'Lavoro e identità',
+    description:
+      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro. Riflessioni per chi lavora in Toscana e non solo.',
+  },
+  'vita-digitale': {
+    label: 'Vita digitale',
+    description:
+      'Social media, dipendenze digitali, relazioni online: come navigare il mondo connesso con consapevolezza e salute mentale.',
+  },
+  'mezza-eta': {
+    label: 'Mezza età',
+    description:
+      'Crisi di mezza età, bilanci di vita, nuovi inizi: riflessioni per chi si trova a un crocevia tra passato e futuro.',
+  },
+  adolescenza: {
+    label: 'Adolescenza e giovani',
+    description:
+      'Crescita emotiva, identità giovanile, sfide dell\'adolescenza vista da dentro e da fuori, per ragazzi e per i loro genitori.',
+  },
+  'salute-corpo': {
+    label: 'Salute e corpo',
+    description:
+      'Il legame tra mente e corpo: sonno, alimentazione, movimento fisico e benessere psicologico. Scienza accessibile e applicabile.',
+  },
+};
+
+export async function getStaticPaths() {
+  const PER_PAGE = 12;
+  const all = await getCollection('articles');
+  const topics = Array.from(new Set(all.map((a) => a.data.topic)));
+
+  const paths: { params: { topic: string; page: string }; props: { topic: string; page: number; totalPages: number } }[] = [];
+
+  for (const topic of topics) {
+    const articles = all.filter((a) => a.data.topic === topic);
+    const totalPages = Math.ceil(articles.length / PER_PAGE);
+    for (let page = 2; page <= totalPages; page++) {
+      paths.push({
+        params: { topic, page: String(page) },
+        props: { topic, page, totalPages },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { topic, page, totalPages } = Astro.props as {
+  topic: string;
+  page: number;
+  totalPages: number;
+};
+
+const meta = topicMeta[topic] ?? { label: topic, description: '' };
+
+const allArticles = await getCollection('articles');
+const topicArticles = allArticles
+  .filter((a) => a.data.topic === topic)
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  );
+
+const start = (page - 1) * ARTICLES_PER_PAGE;
+const pageArticles = topicArticles.slice(start, start + ARTICLES_PER_PAGE);
+
+const recentArticles = allArticles
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  )
+  .slice(0, 5)
+  .map((a) => ({
+    title: a.data.title,
+    slug: a.id,
+    image: a.data.heroImage,
+    date: a.data.publishedDate,
+    topic: a.data.topic,
+  }));
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Argomenti', href: '/argomento/' },
+  { label: meta.label, href: `/argomento/${topic}/` },
+  { label: `Pagina ${page}`, href: '#' },
+];
+
+const canonicalUrl = new URL(`/argomento/${topic}/pagina/${page}/`, Astro.site).toString();
+---
+
+<Base
+  title={`${meta.label} — pagina ${page}`}
+  description={meta.description}
+  canonicalUrl={canonicalUrl}
+>
+  <Header />
+
+  <div class="ist-topic-hero">
+    <div class="ist-container">
+      <p class="ist-topic-hero__label">Argomento — pagina {page}</p>
+      <h1 class="ist-topic-hero__title">{meta.label}</h1>
+      <p class="ist-topic-hero__desc">{meta.description}</p>
+    </div>
+  </div>
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container" style="padding-bottom:60px;">
+      <div class="ist-layout-2col">
+        <div>
+          {pageArticles.length > 0 ? (
+            <div class="ist-card-grid">
+              {pageArticles.map((article) => (
+                <ArticleCard
+                  title={article.data.title}
+                  slug={article.id}
+                  excerpt={article.data.description}
+                  image={article.data.heroImage}
+                  date={article.data.publishedDate}
+                  author={article.data.author}
+                  authorSlug={article.data.authorSlug}
+                  tags={article.data.tags}
+                  topic={article.data.topic}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:48px; text-align:center; color:var(--contrast-2);">
+              <p>Nessun articolo in questa pagina.</p>
+            </div>
+          )}
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            basePath={`/argomento/${topic}/`}
+          />
+        </div>
+
+        <aside aria-label="Barra laterale">
+          <Sidebar recentArticles={recentArticles} activeTopic={topic} />
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

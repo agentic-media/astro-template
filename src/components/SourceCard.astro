@@ -1,0 +1,32 @@
+---
+export interface Props {
+  url: string;
+  title?: string | null;
+  description?: string | null;
+  image?: string | null;
+  siteName?: string | null;
+  fallback?: { title?: string; siteName?: string };
+}
+
+const { url, title, siteName, fallback = {} } = Astro.props;
+
+const displayTitle = title ?? fallback.title ?? url;
+const displaySite =
+  siteName ??
+  fallback.siteName ??
+  (() => {
+    try {
+      return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+      return '';
+    }
+  })();
+---
+
+<a class="ist-source-card" href={url} target="_blank" rel="noopener noreferrer nofollow">
+  <div class="ist-source-card__top">
+    {displaySite && <p class="ist-source-card__site">{displaySite}</p>}
+    <span class="ist-source-card__open" aria-hidden="true">Apri →</span>
+  </div>
+  <h3 class="ist-source-card__title">{displayTitle}</h3>
+</a>

@@ -1,0 +1,10 @@
+# Treat font + image binaries with LFS in CONSUMING repos. The template
+# only ships a small Blinker font set as the default; consumers who add
+# heavier media should mirror these rules in their own .gitattributes.
+*.woff2                            filter=lfs diff=lfs merge=lfs -text
+*.woff                             filter=lfs diff=lfs merge=lfs -text
+*.ttf                              filter=lfs diff=lfs merge=lfs -text
+*.otf                              filter=lfs diff=lfs merge=lfs -text
+
+*.mdx                              text
+*.md                               text

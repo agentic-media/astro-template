@@ -1,0 +1,174 @@
+---
+import Base from '../../../../layouts/Base.astro';
+import Header from '../../../../components/Header.astro';
+import Footer from '../../../../components/Footer.astro';
+import ArticleCard from '../../../../components/ArticleCard.astro';
+import Sidebar from '../../../../components/Sidebar.astro';
+import Breadcrumbs from '../../../../components/Breadcrumbs.astro';
+import Pagination from '../../../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const ARTICLES_PER_PAGE = 12;
+
+export async function getStaticPaths() {
+  const PER_PAGE = 12;
+  const authors = await getCollection('authors');
+  const articles = await getCollection('articles');
+
+  const paths: {
+    params: { slug: string; page: string };
+    props: { author: any; page: number; totalPages: number };
+  }[] = [];
+
+  for (const author of authors) {
+    const authorArticles = articles.filter(
+      (a) => a.data.authorSlug === author.data.slug
+    );
+    const totalPages = Math.ceil(authorArticles.length / PER_PAGE);
+    for (let page = 2; page <= totalPages; page++) {
+      paths.push({
+        params: { slug: author.data.slug, page: String(page) },
+        props: { author, page, totalPages },
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { author, page, totalPages } = Astro.props as {
+  author: any;
+  page: number;
+  totalPages: number;
+};
+const { data } = author;
+
+const allArticles = await getCollection('articles');
+const authorArticles = allArticles
+  .filter((a) => a.data.authorSlug === data.slug)
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  );
+
+const start = (page - 1) * ARTICLES_PER_PAGE;
+const pageArticles = authorArticles.slice(start, start + ARTICLES_PER_PAGE);
+
+const recentArticles = allArticles
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  )
+  .slice(0, 5)
+  .map((a) => ({
+    title: a.data.title,
+    slug: a.id,
+    image: a.data.heroImage,
+    date: a.data.publishedDate,
+    topic: a.data.topic,
+  }));
+
+const breadcrumbItems = [
+  { label: 'Home', href: '/' },
+  { label: 'Autori', href: '/chi-siamo/' },
+  { label: data.name, href: `/autore/${data.slug}/` },
+  { label: `Pagina ${page}`, href: '#' },
+];
+
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0].toUpperCase())
+    .join('');
+}
+
+const canonicalUrl = new URL(`/autore/${data.slug}/pagina/${page}/`, Astro.site).toString();
+---
+
+<Base
+  title={`${data.name} — pagina ${page}`}
+  description={data.bioShort}
+  canonicalUrl={canonicalUrl}
+>
+  <Header />
+
+  <div class="ist-container">
+    <Breadcrumbs items={breadcrumbItems} />
+  </div>
+
+  <main>
+    <div class="ist-container" style="padding-bottom:60px;">
+      <div class="ist-author-header">
+        <div class="ist-author-header__avatar">
+          {data.avatar ? (
+            <img
+              src={data.avatar}
+              alt={`Foto di ${data.name}`}
+              width="100"
+              height="100"
+            />
+          ) : (
+            <div class="ist-author-header__avatar-initials">
+              {getInitials(data.name)}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h1 class="ist-author-header__name">{data.name}</h1>
+          <p class="ist-author-header__job-title">{data.title}</p>
+          <p class="ist-author-header__bio">{data.bio}</p>
+        </div>
+      </div>
+
+      <div class="ist-layout-2col">
+        <div>
+          <h2 style="font-size:1.3rem; font-weight:700; color:var(--navy); margin-bottom:24px;">
+            Articoli di {data.name} — pagina {page}
+            <span style="font-size:0.85rem; color:var(--contrast-2); font-weight:400; margin-left:8px;">
+              ({authorArticles.length})
+            </span>
+          </h2>
+
+          {pageArticles.length > 0 ? (
+            <div class="ist-card-grid">
+              {pageArticles.map((article) => (
+                <ArticleCard
+                  title={article.data.title}
+                  slug={article.id}
+                  excerpt={article.data.description}
+                  image={article.data.heroImage}
+                  date={article.data.publishedDate}
+                  author={article.data.author}
+                  authorSlug={article.data.authorSlug}
+                  tags={article.data.tags}
+                  topic={article.data.topic}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:36px; text-align:center; color:var(--contrast-2);">
+              <p>Nessun articolo in questa pagina.</p>
+            </div>
+          )}
+
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            basePath={`/autore/${data.slug}/`}
+          />
+        </div>
+
+        <aside aria-label="Barra laterale">
+          <Sidebar recentArticles={recentArticles} />
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

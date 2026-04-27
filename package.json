@@ -1,0 +1,41 @@
+{
+  "name": "@agentic-media/astro-template",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Shared Astro 6 template for agentic-media editorial sites: layouts, components, content collection schemas, RSS, sitemap, and a Web Push worker.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentic-media/astro-template.git"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "public",
+    "scripts",
+    "workers",
+    "README.md"
+  ],
+  "exports": {
+    "./components/*": "./src/components/*",
+    "./layouts/*": "./src/layouts/*",
+    "./pages/*": "./src/pages/*",
+    "./styles/*": "./src/styles/*",
+    "./content": "./src/content.config.ts",
+    "./scripts/*": "./scripts/*"
+  },
+  "peerDependencies": {
+    "astro": "^6.1.9",
+    "@astrojs/mdx": "^5.0.4",
+    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/rss": "^4.0.18"
+  },
+  "devDependencies": {
+    "astro": "^6.1.9",
+    "@astrojs/mdx": "^5.0.4",
+    "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/rss": "^4.0.18"
+  }
+}

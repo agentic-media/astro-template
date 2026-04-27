@@ -1,0 +1,77 @@
+---
+const topics = [
+  { slug: 'relazioni', label: 'Relazioni e comunicazione' },
+  { slug: 'famiglia', label: 'Famiglia e genitorialità' },
+  { slug: 'benessere-mentale', label: 'Benessere mentale' },
+  { slug: 'lavoro', label: 'Lavoro e identità' },
+  { slug: 'vita-digitale', label: 'Vita digitale' },
+  { slug: 'mezza-eta', label: 'Mezza età' },
+  { slug: 'adolescenza', label: 'Adolescenza e giovani' },
+  { slug: 'salute-corpo', label: 'Salute e corpo' },
+];
+
+const links = [
+  { href: '/', label: 'Home' },
+  { href: '/chi-siamo/', label: 'Chi siamo' },
+  { href: '/contatti/', label: 'Contatti' },
+  { href: '/privacy-policy/', label: 'Privacy Policy' },
+  { href: '/cookie-policy/', label: 'Cookie Policy' },
+  { href: '/feed.xml', label: 'RSS Feed' },
+];
+
+const currentYear = new Date().getFullYear();
+interface Props { logoTop?: string; logoBottom?: string; siteName?: string }
+const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.props as Props;
+
+---
+
+<footer class="ist-footer">
+  <div class="ist-container">
+    <div class="ist-footer__grid">
+      <!-- Brand column -->
+      <div class="ist-footer__brand">
+        <a href="/" class="ist-logo ist-footer__logo" aria-label="Insieme Salute Toscana">
+          <span class="ist-logo__top">{logoTop}</span>
+          <span class="ist-logo__salute">SALUTE</span>
+          <span class="ist-logo__bottom">{logoBottom}</span>
+        </a>
+        <p class="ist-footer__lede">
+          Informazione sulla salute psicologica e il benessere in Toscana. Articoli
+          scritti da professionisti, per aiutarti a stare meglio ogni giorno.
+        </p>
+      </div>
+
+      <!-- Topics column -->
+      <div>
+        <h3 class="ist-footer__col-title">Argomenti</h3>
+        <nav class="ist-footer__links" aria-label="Argomenti">
+          {topics.map((topic) => (
+            <a href={`/argomento/${topic.slug}/`}>{topic.label}</a>
+          ))}
+        </nav>
+      </div>
+
+      <!-- Links column -->
+      <div>
+        <h3 class="ist-footer__col-title">Collegamenti</h3>
+        <nav class="ist-footer__links" aria-label="Link utili">
+          {links.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </nav>
+      </div>
+    </div>
+
+    <!-- Bottom strip -->
+    <div class="ist-footer__bottom">
+      <span>
+        &copy; {currentYear} Insieme Salute Toscana. Tutti i diritti riservati.
+      </span>
+      <span>
+        I contenuti hanno scopo informativo e non sostituiscono il parere medico.
+        <a href="/privacy-policy/">Privacy</a> ·
+        <a href="/cookie-policy/">Cookie</a>
+      </span>
+    </div>
+  </div>
+</footer>

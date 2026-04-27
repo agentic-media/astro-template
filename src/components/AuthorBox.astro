@@ -1,0 +1,52 @@
+---
+export interface Props {
+  name: string;
+  bio: string;
+  slug: string;
+  avatar?: string;
+  jobTitle?: string;
+}
+
+const { name, bio, slug, avatar, jobTitle } = Astro.props;
+
+// Generate initials from name
+function getInitials(fullName: string): string {
+  return fullName
+    .split(' ')
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((n) => n[0].toUpperCase())
+    .join('');
+}
+
+const initials = getInitials(name);
+---
+
+<aside class="ist-author-box" aria-label={`Informazioni su ${name}`}>
+  <div class="ist-author-box__avatar">
+    {avatar ? (
+      <img
+        class="ist-author-box__avatar-img"
+        src={avatar}
+        alt={`Foto di ${name}`}
+        width="72"
+        height="72"
+        loading="lazy"
+      />
+    ) : (
+      <div class="ist-author-box__avatar-initials" aria-hidden="true">
+        {initials}
+      </div>
+    )}
+  </div>
+
+  <div class="ist-author-box__info">
+    <p class="ist-author-box__name">
+      <a href={`/autore/${slug}/`}>{name}</a>
+    </p>
+    {jobTitle && (
+      <p class="ist-author-box__title">{jobTitle}</p>
+    )}
+    <p class="ist-author-box__bio">{bio}</p>
+  </div>
+</aside>

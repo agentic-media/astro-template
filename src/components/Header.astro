@@ -1,0 +1,116 @@
+---
+const topics = [
+  { slug: 'relazioni', label: 'Relazioni e comunicazione' },
+  { slug: 'famiglia', label: 'Famiglia e genitorialità' },
+  { slug: 'benessere-mentale', label: 'Benessere mentale' },
+  { slug: 'lavoro', label: 'Lavoro e identità' },
+  { slug: 'vita-digitale', label: 'Vita digitale' },
+  { slug: 'mezza-eta', label: 'Mezza età' },
+  { slug: 'adolescenza', label: 'Adolescenza e giovani' },
+  { slug: 'salute-corpo', label: 'Salute e corpo' },
+];
+
+const currentPath = Astro.url.pathname;
+interface Props { logoTop?: string; logoBottom?: string; siteName?: string }
+const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.props as Props;
+
+---
+
+<header class="ist-header">
+  <div class="ist-container">
+    <div class="ist-header__inner">
+      <!-- CSS Wordmark Logo -->
+      <a href="/" class="ist-logo" aria-label="Insieme Salute Toscana - Homepage">
+        <span class="ist-logo__top">{logoTop}</span>
+        <span class="ist-logo__salute">SALUTE</span>
+        <span class="ist-logo__bottom">{logoBottom}</span>
+      </a>
+
+      <!-- Mobile nav toggle -->
+      <button
+        class="ist-nav-toggle"
+        aria-expanded="false"
+        aria-controls="main-nav"
+        aria-label="Apri menu di navigazione"
+        id="nav-toggle"
+      >
+        ☰
+      </button>
+
+      <!-- Navigation -->
+      <nav class="ist-nav" id="main-nav" aria-label="Navigazione principale">
+        <a
+          href="/"
+          class={currentPath === '/' ? 'active' : ''}
+        >
+          Home
+        </a>
+
+        <a
+          href="/chi-siamo/"
+          class={currentPath.startsWith('/chi-siamo') ? 'active' : ''}
+        >
+          Chi siamo
+        </a>
+
+        <div class="ist-nav__dropdown" id="argomenti-dropdown">
+          <a
+            href="/argomento/"
+            class={`ist-nav__dropdown-toggle ${currentPath.startsWith('/argomento') ? 'active' : ''}`}
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            Argomenti
+          </a>
+          <ul class="ist-nav__dropdown-menu" role="menu">
+            {topics.map((topic) => (
+              <li role="none">
+                <a
+                  href={`/argomento/${topic.slug}/`}
+                  role="menuitem"
+                  class={currentPath === `/argomento/${topic.slug}/` ? 'active' : ''}
+                >
+                  {topic.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <a
+          href="/contatti/"
+          class={currentPath.startsWith('/contatti') ? 'active' : ''}
+        >
+          Contatti
+        </a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<script>
+  const toggle = document.getElementById('nav-toggle');
+  const nav = document.getElementById('main-nav');
+  const dropdownBtn = document.querySelector('.ist-nav__dropdown-toggle') as HTMLElement | null;
+  const dropdown = document.getElementById('argomenti-dropdown');
+
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('is-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.textContent = isOpen ? '✕' : '☰';
+    });
+  }
+
+  // Mobile dropdown toggle
+  if (dropdownBtn && dropdown) {
+    dropdownBtn.addEventListener('click', (e) => {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        e.preventDefault();
+        const isOpen = dropdown.classList.toggle('is-open');
+        dropdownBtn.setAttribute('aria-expanded', String(isOpen));
+      }
+    });
+  }
+</script>

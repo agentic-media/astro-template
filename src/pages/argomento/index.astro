@@ -1,0 +1,133 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getCollection } from 'astro:content';
+
+const topics = [
+  {
+    slug: 'relazioni',
+    label: 'Relazioni e comunicazione',
+    icon: '💬',
+    description:
+      'Come costruire e coltivare relazioni sane, comunicare meglio con il partner, amici e colleghi.',
+  },
+  {
+    slug: 'famiglia',
+    label: 'Famiglia e genitorialità',
+    icon: '👨‍👩‍👧',
+    description:
+      'Genitorialità consapevole, dinamiche familiari, adolescenza in famiglia e molto altro.',
+  },
+  {
+    slug: 'benessere-mentale',
+    label: 'Benessere mentale',
+    icon: '🧠',
+    description:
+      'Ansia, stress, autostima, mindfulness: strumenti concreti per la tua salute psicologica.',
+  },
+  {
+    slug: 'lavoro',
+    label: 'Lavoro e identità',
+    icon: '💼',
+    description:
+      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro.',
+  },
+  {
+    slug: 'vita-digitale',
+    label: 'Vita digitale',
+    icon: '📱',
+    description:
+      'Social media, dipendenze digitali, relazioni online: come navigare il mondo connesso con consapevolezza.',
+  },
+  {
+    slug: 'mezza-eta',
+    label: 'Mezza età',
+    icon: '🔄',
+    description:
+      'Crisi di mezza età, bilanci di vita, nuovi inizi: riflessioni per chi si trova a un crocevia.',
+  },
+  {
+    slug: 'adolescenza',
+    label: 'Adolescenza e giovani',
+    icon: '🌱',
+    description:
+      'Crescita emotiva, identità giovanile, sfide dell\'adolescenza vista da dentro e da fuori.',
+  },
+  {
+    slug: 'salute-corpo',
+    label: 'Salute e corpo',
+    icon: '🏃',
+    description:
+      'Il legame tra mente e corpo: sonno, alimentazione, movimento fisico e benessere psicologico.',
+  },
+];
+
+// Count articles per topic
+const allArticles = await getCollection('articles');
+const countByTopic: Record<string, number> = {};
+allArticles.forEach((a) => {
+  countByTopic[a.data.topic] = (countByTopic[a.data.topic] ?? 0) + 1;
+});
+---
+
+<Base
+  title="Argomenti — Insieme Salute Toscana"
+  description="Esplora tutti gli argomenti di Insieme Salute Toscana: relazioni, famiglia, benessere mentale, lavoro, vita digitale, mezza età, adolescenza e salute del corpo."
+  canonicalUrl={new URL("/argomento/", Astro.site).toString()}
+>
+  <Header />
+
+  <main>
+    <div style="background:var(--navy); color:#fff; padding:40px 0 32px;">
+      <div class="ist-container">
+        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px;">
+          Argomenti
+        </h1>
+        <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6;">
+          Scegli un tema e trova articoli scritti da psicologi esperti in quella
+          specifica area.
+        </p>
+      </div>
+    </div>
+
+    <div class="ist-container" style="padding-block:48px;">
+      <div
+        style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:24px;"
+      >
+        {topics.map((topic) => {
+          const count = countByTopic[topic.slug] ?? 0;
+          return (
+            <a
+              href={`/argomento/${topic.slug}/`}
+              style="background:var(--base-2); border-radius:var(--radius-card); padding:28px 24px; text-decoration:none; display:flex; flex-direction:column; gap:10px; transition:transform 0.2s, box-shadow 0.2s;"
+              class="ist-topic-card"
+            >
+              <span style="font-size:2rem;" aria-hidden="true">{topic.icon}</span>
+              <h2 style="font-size:1.1rem; font-weight:700; color:var(--navy); margin:0;">
+                {topic.label}
+              </h2>
+              <p style="font-size:0.88rem; color:var(--contrast-2); line-height:1.55; margin:0; flex:1;">
+                {topic.description}
+              </p>
+              {count > 0 && (
+                <span style="font-size:0.78rem; font-weight:600; color:var(--magenta);">
+                  {count} {count === 1 ? 'articolo' : 'articoli'}
+                </span>
+              )}
+            </a>
+          );
+        })}
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>
+
+<style>
+  .ist-topic-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+</style>

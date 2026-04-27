@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base
+  title="Pagina non trovata (404) — Insieme Salute Toscana"
+  description="La pagina che cerchi non esiste o è stata spostata. Torna alla homepage di Insieme Salute Toscana."
+>
+  <Header />
+
+  <main>
+    <div class="ist-container">
+      <div class="ist-404">
+        <div class="ist-404__inner">
+          <span class="ist-404__code" aria-hidden="true">404</span>
+          <h1 class="ist-404__title">Pagina non trovata</h1>
+          <p class="ist-404__desc">
+            La pagina che cerchi non esiste, è stata spostata o rimossa.
+            Prova a tornare alla homepage o a cercare tra gli argomenti.
+          </p>
+          <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <a href="/" class="ist-btn ist-btn--primary">
+              ← Torna alla homepage
+            </a>
+            <a href="/argomento/" class="ist-btn ist-btn--secondary">
+              Sfoglia gli argomenti
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

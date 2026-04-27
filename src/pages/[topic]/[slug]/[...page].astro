@@ -1,0 +1,117 @@
+---
+import { getCollection } from 'astro:content';
+import { readFileSync } from 'node:fs';
+import { createMarkdownProcessor } from '@astrojs/markdown-remark';
+import ArticleLayout from '../../../layouts/ArticleLayout.astro';
+
+/**
+ * Per-page article route.
+ *
+ * Each MDX article is split on its `<Page>...</Page>` blocks into N
+ * separate routes:
+ *   page 1 → /[topic]/[slug]/
+ *   page 2 → /[topic]/[slug]/2/
+ *   page N → /[topic]/[slug]/N/
+ *
+ * Every page is its own HTML document — that's what AdSense / GAM /
+ * Auto Ads need to register a real pageview and refresh ad inventory.
+ * It also restores the WordPress-era multi-page URL structure.
+ */
+
+export async function getStaticPaths() {
+  // Inlined inside getStaticPaths because Astro runs this function in an
+  // isolated context that doesn't see other top-level frontmatter vars.
+  function extractPages(raw: string): string[] {
+    const m = raw.match(/^---\n[\s\S]*?\n---\n?([\s\S]*)$/);
+    const body = m ? m[1] : raw;
+    const re = /<Page>\s*\n([\s\S]*?)\n\s*<\/Page>/g;
+    const pages: string[] = [];
+    let match: RegExpExecArray | null;
+    while ((match = re.exec(body)) !== null) {
+      pages.push(match[1].trim());
+    }
+    if (pages.length === 0) {
+      const stripped = body
+        .replace(/^\s*import\s+[^;]+;?\s*\n/gm, '')
+        .trim();
+      if (stripped) pages.push(stripped);
+    }
+    return pages;
+  }
+
+  const articles = await getCollection('articles');
+  const sorted = articles.sort(
+    (a, b) =>
+      new Date(a.data.publishedDate).getTime() -
+      new Date(b.data.publishedDate).getTime()
+  );
+
+  const paths: any[] = [];
+  for (let i = 0; i < sorted.length; i++) {
+    const article = sorted[i];
+    const raw = readFileSync(
+      `src/content/articles/${article.id}.mdx`,
+      'utf8'
+    );
+    const pages = extractPages(raw);
+    const totalPages = pages.length;
+
+    const prev = i > 0 ? sorted[i - 1] : null;
+    const next = i < sorted.length - 1 ? sorted[i + 1] : null;
+
+    for (let p = 0; p < totalPages; p++) {
+      const human = p + 1;
+      paths.push({
+        params: {
+          topic: article.data.topic,
+          slug: article.id,
+          // Astro rest-param: undefined → URL has no trailing segment
+          page: human === 1 ? undefined : String(human),
+        },
+        props: {
+          article,
+          currentPage: human,
+          totalPages,
+          pageMarkdown: pages[p],
+          prevArticle: prev
+            ? { title: prev.data.title, slug: prev.id, topic: prev.data.topic }
+            : null,
+          nextArticle: next
+            ? {
+                title: next.data.title,
+                slug: next.id,
+                excerpt: next.data.description,
+                heroImage: next.data.heroImage,
+                topic: next.data.topic,
+              }
+            : null,
+        },
+      });
+    }
+  }
+  return paths;
+}
+
+const {
+  article,
+  currentPage,
+  totalPages,
+  pageMarkdown,
+  prevArticle,
+  nextArticle,
+} = Astro.props;
+
+const processor = await createMarkdownProcessor();
+const rendered = await processor.render(pageMarkdown);
+
+const articleFrontmatter = {
+  ...article.data,
+  slug: article.id,
+  currentPage,
+  totalPages,
+  prevArticle,
+  nextArticle,
+};
+---
+
+<ArticleLayout article={articleFrontmatter} pageHtml={rendered.code} />

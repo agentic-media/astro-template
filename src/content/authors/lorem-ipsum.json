@@ -1,0 +1,10 @@
+{
+  "name": "Lorem Ipsum",
+  "slug": "lorem-ipsum",
+  "title": "Lorem ipsum dolor sit amet",
+  "bio": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "bioShort": "Lorem ipsum dolor sit amet.",
+  "specialization": ["lorem", "ipsum"],
+  "topics": ["lorem"],
+  "writingStyle": "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+}

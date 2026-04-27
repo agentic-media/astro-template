@@ -1,0 +1,104 @@
+---
+export interface RecentArticle {
+  title: string;
+  slug: string;
+  image?: string;
+  date: string;
+  topic: string;
+}
+
+export interface Props {
+  recentArticles?: RecentArticle[];
+  activeTopic?: string;
+}
+
+const { recentArticles = [], activeTopic } = Astro.props;
+
+const topics = [
+  { slug: 'relazioni', label: 'Relazioni' },
+  { slug: 'famiglia', label: 'Famiglia' },
+  { slug: 'benessere-mentale', label: 'Benessere mentale' },
+  { slug: 'lavoro', label: 'Lavoro' },
+  { slug: 'vita-digitale', label: 'Vita digitale' },
+  { slug: 'mezza-eta', label: 'Mezza età' },
+  { slug: 'adolescenza', label: 'Adolescenza' },
+  { slug: 'salute-corpo', label: 'Salute e corpo' },
+];
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat('it-IT', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(new Date(dateStr));
+}
+---
+
+<!-- Search Widget -->
+<div class="ist-widget">
+  <h3 class="ist-widget__title">Cerca</h3>
+  <form class="ist-search" role="search" action="/cerca/" method="get">
+    <label for="sidebar-search" class="sr-only">Cerca articoli</label>
+    <input
+      class="ist-search__input"
+      type="search"
+      id="sidebar-search"
+      name="q"
+      placeholder="Cerca articoli…"
+      autocomplete="off"
+    />
+    <button class="ist-search__btn" type="submit" aria-label="Cerca">
+      🔍
+    </button>
+  </form>
+</div>
+
+<!-- Topics Tag Cloud -->
+<div class="ist-widget">
+  <h3 class="ist-widget__title">Argomenti</h3>
+  <div class="ist-tag-cloud">
+    {topics.map((topic) => (
+      <a
+        href={`/argomento/${topic.slug}/`}
+        class={`ist-tag ist-tag--topic${activeTopic === topic.slug ? ' active' : ''}`}
+        aria-current={activeTopic === topic.slug ? 'page' : undefined}
+      >
+        {topic.label}
+      </a>
+    ))}
+  </div>
+</div>
+
+<!-- Recent Articles -->
+{recentArticles.length > 0 && (
+  <div class="ist-widget">
+    <h3 class="ist-widget__title">Ultimi articoli</h3>
+    <ul class="ist-recent-list">
+      {recentArticles.map((article) => (
+        <li class="ist-recent-item">
+          {article.image ? (
+            <img
+              class="ist-recent-item__thumb"
+              src={article.image}
+              alt={article.title}
+              loading="lazy"
+              decoding="async"
+              width="60"
+              height="60"
+            />
+          ) : (
+            <div class="ist-recent-item__thumb-placeholder" aria-hidden="true">🌿</div>
+          )}
+          <div class="ist-recent-item__info">
+            <p class="ist-recent-item__title">
+              <a href={`/${article.topic}/${article.slug}/`}>{article.title}</a>
+            </p>
+            <time class="ist-recent-item__date" datetime={article.date}>
+              {formatDate(article.date)}
+            </time>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}

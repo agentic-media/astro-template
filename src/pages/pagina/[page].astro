@@ -1,0 +1,99 @@
+---
+import Base from '../../layouts/Base.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Sidebar from '../../components/Sidebar.astro';
+import Pagination from '../../components/Pagination.astro';
+import { getCollection } from 'astro:content';
+
+const ARTICLES_PER_PAGE = 12;
+
+export async function getStaticPaths() {
+  const PER_PAGE = 12;
+  const all = await getCollection('articles');
+  const sorted = all.sort(
+    (a, b) =>
+      new Date(b.data.publishedDate).getTime() -
+      new Date(a.data.publishedDate).getTime()
+  );
+  const totalPages = Math.ceil(sorted.length / PER_PAGE);
+
+  return Array.from({ length: totalPages - 1 }, (_, i) => i + 2).map((page) => ({
+    params: { page: String(page) },
+    props: { page, totalPages },
+  }));
+}
+
+const { page, totalPages } = Astro.props as { page: number; totalPages: number };
+
+const allArticles = await getCollection('articles');
+const sortedArticles = allArticles.sort(
+  (a, b) =>
+    new Date(b.data.publishedDate).getTime() -
+    new Date(a.data.publishedDate).getTime()
+);
+
+const start = (page - 1) * ARTICLES_PER_PAGE;
+const articles = sortedArticles.slice(start, start + ARTICLES_PER_PAGE);
+
+const recentArticles = sortedArticles.slice(0, 5).map((a) => ({
+  title: a.data.title,
+  slug: a.id,
+  image: a.data.heroImage,
+  date: a.data.publishedDate,
+  topic: a.data.topic,
+}));
+
+const canonicalUrl = new URL(`/pagina/${page}/`, Astro.site).toString();
+---
+
+<Base
+  title={`Articoli — pagina ${page} — Insieme Salute Toscana`}
+  description="Informazione sulla salute psicologica e il benessere in Toscana. Articoli scritti da professionisti."
+  canonicalUrl={canonicalUrl}
+>
+  <Header />
+
+  <main>
+    <div class="ist-container" style="padding-top:40px; padding-bottom:60px;">
+      <div class="ist-layout-2col">
+        <div>
+          <h1 style="font-size:1.6rem; font-weight:700; color:var(--navy); margin-bottom:24px;">
+            Articoli — pagina {page}
+          </h1>
+
+          {articles.length > 0 ? (
+            <div class="ist-card-grid">
+              {articles.map((article) => (
+                <ArticleCard
+                  title={article.data.title}
+                  slug={article.id}
+                  excerpt={article.data.description}
+                  image={article.data.heroImage}
+                  date={article.data.publishedDate}
+                  author={article.data.author}
+                  authorSlug={article.data.authorSlug}
+                  tags={article.data.tags}
+                  topic={article.data.topic}
+                />
+              ))}
+            </div>
+          ) : (
+            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:48px; text-align:center; color:var(--contrast-2);">
+              <p>Nessun articolo in questa pagina.</p>
+            </div>
+          )}
+
+          <Pagination currentPage={page} totalPages={totalPages} basePath="/" />
+        </div>
+
+        <aside aria-label="Barra laterale">
+          <Sidebar recentArticles={recentArticles} />
+        </aside>
+      </div>
+    </div>
+  </main>
+
+  <Footer />
+</Base>

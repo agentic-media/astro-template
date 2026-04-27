@@ -1,0 +1,98 @@
+---
+import TagPill from './TagPill.astro';
+
+export interface Props {
+  title: string;
+  slug: string;
+  excerpt: string;
+  image?: string;
+  date: string;
+  author: string;
+  authorSlug?: string;
+  tags?: string[];
+  topic: string;
+}
+
+const {
+  title,
+  slug,
+  excerpt,
+  image,
+  date,
+  author,
+  authorSlug,
+  tags = [],
+  topic,
+} = Astro.props;
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat('it-IT', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(dateStr));
+}
+
+const articleUrl = `/${topic}/${slug}/`;
+---
+
+<article class="ist-article-card" itemscope itemtype="https://schema.org/Article">
+  <a href={articleUrl} class="ist-article-card__img-wrap" tabindex="-1" aria-hidden="true">
+    {image ? (
+      <img
+        class="ist-article-card__img"
+        src={image}
+        alt={title}
+        loading="lazy"
+        decoding="async"
+        itemprop="image"
+      />
+    ) : (
+      <div class="ist-article-card__img-placeholder" aria-hidden="true">🌿</div>
+    )}
+  </a>
+
+  <div class="ist-article-card__body">
+    <div class="ist-article-card__meta">
+      <time
+        class="ist-article-card__date"
+        datetime={date}
+        itemprop="datePublished"
+      >
+        {formatDate(date)}
+      </time>
+      {authorSlug ? (
+        <a
+          class="ist-article-card__author"
+          href={`/autore/${authorSlug}/`}
+          itemprop="author"
+        >
+          {author}
+        </a>
+      ) : (
+        <span class="ist-article-card__author" itemprop="author">{author}</span>
+      )}
+    </div>
+
+    <h2 class="ist-article-card__title" itemprop="headline">
+      <a href={articleUrl}>{title}</a>
+    </h2>
+
+    <p class="ist-article-card__excerpt" itemprop="description">
+      {excerpt.length > 160 ? excerpt.slice(0, 157) + '…' : excerpt}
+    </p>
+
+    <div class="ist-article-card__footer">
+      {tags.length > 0 && (
+        <div class="ist-article-card__tags">
+          {tags.slice(0, 3).map((tag) => (
+            <TagPill tag={tag} topic={topic} />
+          ))}
+        </div>
+      )}
+      <a class="ist-article-card__read-more" href={articleUrl} aria-label={`Leggi: ${title}`}>
+        Leggi
+      </a>
+    </div>
+  </div>
+</article>
