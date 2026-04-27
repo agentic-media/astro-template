@@ -1,0 +1,73 @@
+# Per-site configuration consumed by @agentic-media/astro-template.
+# Drop a copy of this at <project-root>/site.config.yaml and edit.
+# The template's integration loads + validates this file at build
+# time and rejects unknown / missing required fields with line-pointing
+# errors.
+#
+# Secrets (VAPID private key, push worker auth, MongoDB URI) DO NOT
+# live in this file — keep them in Cloudflare Pages env vars.
+
+identity:
+  name:        "Lorem Ipsum"          # used in <title>, og:site_name, JSON-LD publisher
+  shortName:   "Lorem"                # apple-mobile-web-app-title (≤ 12 chars)
+  url:         "https://example.com"  # propagated to Astro.site automatically
+  description: "Sed do eiusmod tempor incididunt ut labore et dolore."
+  themeColor:  "#0c1a3a"              # address-bar / PWA splash
+  language:    "it"                   # <html lang>
+  ogLocale:    "it_IT"                # og:locale
+
+logo:
+  top:    "LOREM"                     # bi-colored wordmark, upper tier
+  middle: ""                          # optional middle tier
+  bottom: "IPSUM"                     # lower tier
+
+hero:
+  tagline:     "Lorem ipsum"          # eyebrow above the H1
+  headline:    "Sed do eiusmod tempor"  # H1; defaults to identity.name
+  lede:        "Ut enim ad minim veniam, quis nostrud exercitation."
+  emptyTitle:  "Nessun articolo ancora pubblicato."
+  emptyBody:   ""
+
+topics:
+  - { slug: "argomento-1", label: "Argomento 1", description: "Lorem ipsum.", icon: "📰" }
+  - { slug: "argomento-2", label: "Argomento 2", description: "Sed do eiusmod tempor.", icon: "📚" }
+  - { slug: "argomento-3", label: "Argomento 3", description: "Ut enim ad minim veniam.", icon: "🗞️" }
+
+topicsPage:
+  title: "Argomenti"
+  lede:  "Scegli un tema per esplorare gli articoli."
+
+footer:
+  disclaimer:      ""                     # per-site notice; empty = strip skipped
+  copyrightHolder: "Lorem Ipsum"          # defaults to identity.name
+  topicsTitle:     "Argomenti"
+  linksTitle:      "Collegamenti"
+  links:
+    - { href: "/",                label: "Home" }
+    - { href: "/chi-siamo/",      label: "Chi siamo" }
+    - { href: "/contatti/",       label: "Contatti" }
+    - { href: "/privacy-policy/", label: "Privacy Policy" }
+    - { href: "/cookie-policy/",  label: "Cookie Policy" }
+    - { href: "/feed.xml",        label: "RSS Feed" }
+
+contact:
+  email: "redazione@example.com"
+
+integrations:
+  ga:
+    id: ""                              # "G-XXXXXXXXXX" — empty disables GA4
+  adsense:
+    client: ""                          # "ca-pub-1234567890123456" — empty disables AdSense + ads.txt
+    adsTxtExtra: ""                     # base64-encoded extra ads.txt lines
+  cmp:
+    provider:    "consent.js"           # "consent.js" (default banner) or "none"
+    id:          ""
+    cookieName:  "site_consent"
+    storageKey:  "site_consent"
+  push:
+    enabled:        false                # toggle the Web Push opt-in UI
+    vapidPublicKey: ""                   # public part only — private key stays as Worker secret
+    pushApi:        "/api/push/subscribe"
+
+robots:
+  disallow: []                          # paths to disallow in /robots.txt

@@ -1,4 +1,5 @@
 ---
+import siteConfig from 'virtual:agentic-media/site-config';
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -30,13 +31,13 @@ const recentArticles = sortedArticles.slice(0, 5).map((a) => ({
 
 // All hero copy is per-site via env. Empty defaults render no copy
 // rather than leaking template-author content.
-const siteName     = import.meta.env.PUBLIC_SITE_NAME      ?? 'Site';
-const siteDesc     = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '';
-const heroTagline  = import.meta.env.PUBLIC_SITE_TAGLINE   ?? '';
-const heroHeadline = import.meta.env.PUBLIC_HOME_HEADLINE  ?? siteName;
-const heroLede     = import.meta.env.PUBLIC_HOME_LEDE      ?? siteDesc;
-const emptyTitle   = import.meta.env.PUBLIC_HOME_EMPTY_TITLE ?? 'Nessun articolo ancora pubblicato.';
-const emptyBody    = import.meta.env.PUBLIC_HOME_EMPTY_BODY  ?? '';
+const siteName     = siteConfig.identity.name;
+const siteDesc     = siteConfig.identity.description;
+const heroTagline  = siteConfig.hero.tagline;
+const heroHeadline = (siteConfig.hero.headline ?? siteConfig.identity.name);
+const heroLede     = (siteConfig.hero.lede ?? siteConfig.identity.description);
+const emptyTitle   = siteConfig.hero.emptyTitle;
+const emptyBody    = siteConfig.hero.emptyBody;
 
 const websiteSchema = {
   '@context': 'https://schema.org',
@@ -44,7 +45,7 @@ const websiteSchema = {
   name: siteName,
   url: (Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'),
   description: siteDesc,
-  inLanguage: (import.meta.env.PUBLIC_OG_LOCALE ?? 'it_IT').replace('_', '-'),
+  inLanguage: (siteConfig.identity.ogLocale).replace('_', '-'),
   potentialAction: {
     '@type': 'SearchAction',
     target: {

@@ -1,13 +1,11 @@
+import siteConfig from 'virtual:agentic-media/site-config';
 // Dynamic robots.txt route. Allows everything by default and points
 // to the sitemap derived from `Astro.site`. Set PUBLIC_ROBOTS_DISALLOW
 // to a comma-separated list of paths to disallow (e.g. "/admin/,/draft/").
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = ({ site }) => {
-  const disallow = (import.meta.env.PUBLIC_ROBOTS_DISALLOW ?? '')
-    .split(',')
-    .map((s: string) => s.trim())
-    .filter(Boolean);
+  const disallow = siteConfig.robots.disallow;
   const lines = ['User-agent: *'];
   if (disallow.length === 0) {
     lines.push('Allow: /');

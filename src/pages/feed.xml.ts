@@ -1,3 +1,4 @@
+import siteConfig from 'virtual:agentic-media/site-config';
 import rss from '@astrojs/rss';
 import { getCollection } from 'astro:content';
 import type { APIContext } from 'astro';
@@ -11,11 +12,11 @@ export async function GET(context: APIContext) {
   );
 
   return rss({
-    title: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
-    description: import.meta.env.PUBLIC_RSS_DESCRIPTION ?? import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
+    title: siteConfig.identity.name,
+    description: siteConfig.identity.description,
     site: context.site?.toString() ?? 'https://example.com',
-    language: (import.meta.env.PUBLIC_LANGUAGE ?? 'it') === 'en' ? 'en-US' : 'it-IT',
-    customData: `<language>${(import.meta.env.PUBLIC_LANGUAGE ?? 'it') === 'en' ? 'en-US' : 'it-IT'}</language>`,
+    language: (siteConfig.identity.language) === 'en' ? 'en-US' : 'it-IT',
+    customData: `<language>${(siteConfig.identity.language) === 'en' ? 'en-US' : 'it-IT'}</language>`,
     items: sorted.map((article) => ({
       title: article.data.title,
       description: article.data.description,

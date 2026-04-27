@@ -1,4 +1,5 @@
 ---
+import siteConfig from 'virtual:agentic-media/site-config';
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -12,35 +13,17 @@ const ARTICLES_PER_PAGE = 12;
 
 // Per-site topic taxonomy comes from PUBLIC_SITE_TOPICS — a JSON
 // array of { slug, label, description? }.
-function readTopics(): Array<{ slug: string; label: string; description?: string }> {
-  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
-  if (typeof raw === 'string' && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch { /* fall through */ }
-  }
-  return [
-    { slug: 'argomento-1', label: 'Argomento 1', description: '' },
-  ];
-}
-const SITE_TOPICS = readTopics();
+const SITE_TOPICS = siteConfig.topics;
 const topicMeta: Record<string, { label: string; description: string }> = Object.fromEntries(
   SITE_TOPICS.map((t) => [t.slug, { label: t.label, description: t.description ?? '' }])
 );
 
+// Re-importing the virtual module inside getStaticPaths so Astro's
+// isolated evaluation context still has access. Vite resolves this
+// at build time the same way as the top-level import.
 export async function getStaticPaths() {
-  // Re-read inside getStaticPaths since Astro evaluates it in an
-  // isolated context that doesn't see top-level frontmatter vars.
-  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
-  let slugs: string[] = ['argomento-1'];
-  if (typeof raw === 'string' && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) slugs = parsed.map((t: any) => t.slug).filter(Boolean);
-    } catch { /* ignore */ }
-  }
-  return slugs.map((topic) => ({ params: { topic } }));
+  const { default: gspConfig } = await import('virtual:agentic-media/site-config');
+  return gspConfig.topics.map((t: { slug: string }) => ({ params: { topic: t.slug } }));
 }
 
 const { topic } = Astro.params as { topic: string };
@@ -84,7 +67,7 @@ const breadcrumbItems = [
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: `${meta.label} — ${import.meta.env.PUBLIC_SITE_NAME ?? 'Site'}`,
+  name: `${meta.label} — ${siteConfig.identity.name}`,
   description: meta.description,
   url: `${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`,
   inLanguage: 'it-IT',
@@ -92,7 +75,7 @@ const collectionSchema = {
 ---
 
 <Base
-  title={`${meta.label} — ${import.meta.env.PUBLIC_SITE_NAME ?? "Site"}`}
+  title={`${meta.label} — ${siteConfig.identity.name}`}
   description={meta.description}
   canonicalUrl={`${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`}
 >

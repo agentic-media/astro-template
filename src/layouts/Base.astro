@@ -1,4 +1,5 @@
 ---
+import siteConfig from 'virtual:agentic-media/site-config';
 import '../styles/global.css';
 
 export interface Props {
@@ -44,28 +45,28 @@ const {
 // preview). See template README for the full list and what each one
 // gates.
 const cfg = {
-  siteName:           import.meta.env.PUBLIC_SITE_NAME           ?? 'Site',
-  siteShortName:      import.meta.env.PUBLIC_SITE_SHORT_NAME     ?? import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
-  themeColor:         import.meta.env.PUBLIC_THEME_COLOR         ?? '#0c1a3a',
-  language:           import.meta.env.PUBLIC_LANGUAGE            ?? 'it',
-  ogLocale:           import.meta.env.PUBLIC_OG_LOCALE           ?? 'it_IT',
+  siteName:           siteConfig.identity.name,
+  siteShortName:      (siteConfig.identity.shortName ?? siteConfig.identity.name),
+  themeColor:         siteConfig.identity.themeColor,
+  language:           siteConfig.identity.language,
+  ogLocale:           siteConfig.identity.ogLocale,
 
   // Google services — empty string disables the script entirely.
-  gaId:               import.meta.env.PUBLIC_GA_ID               ?? '',
-  adsenseClient:      import.meta.env.PUBLIC_ADSENSE_CLIENT      ?? '',
+  gaId:               siteConfig.integrations.ga.id,
+  adsenseClient:      siteConfig.integrations.adsense.client,
 
   // CMP / cookie banner. The bundled /consent.js is the default; set
   // PUBLIC_CMP_PROVIDER to 'none' to disable, 'cookiebot' to load
   // Cookiebot, etc. PUBLIC_CMP_ID is the provider's site/account id.
-  cmpProvider:        import.meta.env.PUBLIC_CMP_PROVIDER        ?? 'consent.js',
-  cmpId:              import.meta.env.PUBLIC_CMP_ID              ?? '',
-  cmpCookieName:      import.meta.env.PUBLIC_CMP_COOKIE_NAME     ?? 'site_consent',
-  cmpStorageKey:      import.meta.env.PUBLIC_CMP_STORAGE_KEY     ?? 'site_consent',
+  cmpProvider:        siteConfig.integrations.cmp.provider,
+  cmpId:              siteConfig.integrations.cmp.id,
+  cmpCookieName:      siteConfig.integrations.cmp.cookieName,
+  cmpStorageKey:      siteConfig.integrations.cmp.storageKey,
 
   // Push notifications.
-  pushEnabled:       (import.meta.env.PUBLIC_PUSH_ENABLED       ?? 'true').toLowerCase() === 'true',
-  vapidPublicKey:     import.meta.env.PUBLIC_VAPID_KEY           ?? '',
-  pushApi:            import.meta.env.PUBLIC_PUSH_API            ?? '/api/push/subscribe',
+  pushEnabled:       siteConfig.integrations.push.enabled,
+  vapidPublicKey:     siteConfig.integrations.push.vapidPublicKey,
+  pushApi:            siteConfig.integrations.push.pushApi,
 };
 
 const canonical = canonicalUrl ?? Astro.url.href;

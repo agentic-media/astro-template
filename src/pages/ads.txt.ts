@@ -1,3 +1,4 @@
+import siteConfig from 'virtual:agentic-media/site-config';
 // Dynamic ads.txt route. Emits the AdSense provider line based on
 // PUBLIC_ADSENSE_CLIENT (Cloudflare Pages env var). When the var is
 // empty, returns 200 with an empty body so crawlers see "no ads
@@ -15,8 +16,8 @@
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = () => {
-  const raw = (import.meta.env.PUBLIC_ADSENSE_CLIENT ?? '').trim();
-  const extraB64 = (import.meta.env.PUBLIC_ADS_TXT_EXTRA ?? '').trim();
+  const raw = (siteConfig.integrations.adsense.client).trim();
+  const extraB64 = siteConfig.integrations.adsense.adsTxtExtra;
 
   const lines: string[] = [];
   if (raw) {

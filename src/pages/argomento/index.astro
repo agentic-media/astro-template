@@ -1,4 +1,5 @@
 ---
+import siteConfig from 'virtual:agentic-media/site-config';
 import Base from '../../layouts/Base.astro';
 import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
@@ -7,22 +8,7 @@ import { getCollection } from 'astro:content';
 // Topic list comes from PUBLIC_SITE_TOPICS (a JSON array of
 // {slug,label,description?,icon?}). Falls back to a generic
 // placeholder list — set the env var per site for real labels.
-function readTopics(): Array<{ slug: string; label: string; icon?: string; description?: string }> {
-  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
-  if (typeof raw === 'string' && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch { /* fall through */ }
-  }
-  return [
-    { slug: 'argomento-1', label: 'Argomento 1', description: 'Lorem ipsum dolor sit amet.' },
-    { slug: 'argomento-2', label: 'Argomento 2', description: 'Sed do eiusmod tempor.' },
-    { slug: 'argomento-3', label: 'Argomento 3', description: 'Ut enim ad minim veniam.' },
-  ];
-}
-
-const topics = readTopics();
+const topics = siteConfig.topics;
 
 // Count articles per topic
 const allArticles = await getCollection('articles');
@@ -30,7 +16,7 @@ const countByTopic: Record<string, number> = {};
 allArticles.forEach((a) => {
   countByTopic[a.data.topic] = (countByTopic[a.data.topic] ?? 0) + 1;
 });
-const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+const siteName = siteConfig.identity.name;
 ---
 
 <Base
@@ -44,11 +30,11 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
     <div style="background:var(--navy); color:#fff; padding:40px 0 32px;">
       <div class="ist-container">
         <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px;">
-          {import.meta.env.PUBLIC_TOPICS_PAGE_TITLE ?? 'Argomenti'}
+          {siteConfig.topicsPage.title}
         </h1>
-        {import.meta.env.PUBLIC_TOPICS_PAGE_LEDE && (
+        {siteConfig.topicsPage.lede && (
           <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6;">
-            {import.meta.env.PUBLIC_TOPICS_PAGE_LEDE}
+            {siteConfig.topicsPage.lede}
           </p>
         )}
       </div>

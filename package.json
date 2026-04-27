@@ -25,7 +25,8 @@
     "./styles/*": "./src/styles/*",
     "./content": "./src/content.config.ts",
     "./scripts/*": "./scripts/*",
-    "./integration": "./src/integration.ts"
+    "./integration": "./src/integration.ts",
+    "./site-config": "./src/site-config.ts"
   },
   "peerDependencies": {
     "astro": "^6.1.9",
@@ -41,5 +42,9 @@
   },
   "scripts": {
     "postinstall": "node scripts/postinstall.mjs"
+  },
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "zod": "^3.23.0"
   }
 }

@@ -1,36 +1,8 @@
 ---
-function readTopics(): Array<{ slug: string; label: string; description?: string }> {
-  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
-  if (typeof raw === 'string' && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch { /* fall through */ }
-  }
-  return [];
-}
-
+import siteConfig from 'virtual:agentic-media/site-config';
 // Footer link list — fully driven by env. Default falls back to the
 // usual editorial-site links but the consumer can override via
 // PUBLIC_SITE_FOOTER_LINKS (JSON array of {href,label}).
-function readFooterLinks(): Array<{ href: string; label: string }> {
-  const raw = import.meta.env.PUBLIC_SITE_FOOTER_LINKS;
-  if (typeof raw === 'string' && raw.trim()) {
-    try {
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) return parsed;
-    } catch { /* fall through */ }
-  }
-  return [
-    { href: '/', label: 'Home' },
-    { href: '/chi-siamo/', label: 'Chi siamo' },
-    { href: '/contatti/', label: 'Contatti' },
-    { href: '/privacy-policy/', label: 'Privacy Policy' },
-    { href: '/cookie-policy/', label: 'Cookie Policy' },
-    { href: '/feed.xml', label: 'RSS Feed' },
-  ];
-}
-
 interface Props {
   logoTop?: string;
   logoMiddle?: string;
@@ -52,14 +24,14 @@ const {
   logoTop = 'BRAND',
   logoMiddle = '',
   logoBottom = 'TEMPLATE',
-  siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
-  siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
-  topics = readTopics(),
-  links = readFooterLinks(),
-  disclaimer = import.meta.env.PUBLIC_FOOTER_DISCLAIMER ?? '',
-  copyrightHolder = import.meta.env.PUBLIC_COPYRIGHT_HOLDER ?? siteName,
-  topicsTitle = import.meta.env.PUBLIC_FOOTER_TOPICS_TITLE ?? 'Argomenti',
-  linksTitle = import.meta.env.PUBLIC_FOOTER_LINKS_TITLE ?? 'Collegamenti',
+  siteName = siteConfig.identity.name,
+  siteDescription = siteConfig.identity.description,
+  topics = siteConfig.topics,
+  links = siteConfig.footer.links,
+  disclaimer = siteConfig.footer.disclaimer,
+  copyrightHolder = (siteConfig.footer.copyrightHolder ?? siteConfig.identity.name),
+  topicsTitle = siteConfig.footer.topicsTitle,
+  linksTitle = siteConfig.footer.linksTitle,
 } = Astro.props as Props;
 const currentYear = new Date().getFullYear();
 ---
