@@ -145,3 +145,75 @@ opts in.
 
 MIT — Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
 do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+
+---
+
+## Per-site configuration
+
+The template reads its configuration from Cloudflare Pages environment
+variables (Astro exposes them via `import.meta.env.PUBLIC_*` to the
+client bundle). All variables are documented in `.env.example`.
+
+Quick summary:
+
+| variable                       | what it gates                                                  |
+|--------------------------------|----------------------------------------------------------------|
+| `PUBLIC_SITE_NAME`             | display name in `<title>`, `og:site_name`                      |
+| `PUBLIC_SITE_SHORT_NAME`       | `apple-mobile-web-app-title`                                   |
+| `PUBLIC_THEME_COLOR`           | address-bar color                                              |
+| `PUBLIC_LANGUAGE`              | `<html lang>` (default `it`)                                   |
+| `PUBLIC_OG_LOCALE`             | `og:locale` (default `it_IT`)                                  |
+| `PUBLIC_GA_ID`                 | Google Analytics 4 measurement ID — empty = GA never loaded    |
+| `PUBLIC_ADSENSE_CLIENT`        | AdSense client (also drives `/ads.txt`)                        |
+| `PUBLIC_ADS_TXT_EXTRA`         | base64-encoded extra ads.txt lines                             |
+| `PUBLIC_CMP_PROVIDER`          | cookie consent banner: `consent.js` (default) or `none`        |
+| `PUBLIC_PUSH_ENABLED`          | toggle the Web Push opt-in UI (`true`/`false`)                 |
+| `PUBLIC_VAPID_KEY`             | VAPID public key, paired with the per-site Worker              |
+| `PUBLIC_PUSH_API`              | path the Worker route handles (default `/api/push/subscribe`)  |
+| `PUBLIC_ROBOTS_DISALLOW`       | comma-separated paths to disallow in `/robots.txt`             |
+
+Set them in Cloudflare Pages → your project → Settings → Environment
+variables (production AND preview, unless you only want the script in
+production builds).
+
+### Dynamic `/ads.txt`
+
+The template includes a `src/pages/ads.txt.ts` route that emits the
+AdSense provider line based on `PUBLIC_ADSENSE_CLIENT`. The site MUST
+serve a matching `ads.txt` for AdSense crawlers to verify ownership;
+this dynamic route is enough for most cases — when the env var is
+empty, the response body is empty (200 OK).
+
+### Dynamic `/robots.txt`
+
+`src/pages/robots.txt.ts` emits a default-allow robots.txt and points
+to the sitemap derived from `Astro.site`. Override per-route via
+`PUBLIC_ROBOTS_DISALLOW`.
+
+### Article pagination (multi-page articles)
+
+Articles are single-page by default. To split an article into multiple
+SERP-friendly pages (each its own URL with its own ad-pageview), wrap
+content in `<Page>...</Page>` blocks inside the MDX body:
+
+```mdx
+---
+title: ...
+---
+<Page>
+First page content. Lorem ipsum dolor sit amet…
+</Page>
+
+<Page>
+Second page content. Sed do eiusmod tempor…
+</Page>
+```
+
+The route `[topic]/[slug]/[...page]` produces:
+- `/[topic]/[slug]/`     → page 1
+- `/[topic]/[slug]/2/`   → page 2
+- …
+
+Articles without `<Page>` wrappers are rendered as a single page (all
+content under `/[topic]/[slug]/`). The choice is per-article and
+controlled by the writer.

@@ -31,22 +31,91 @@ const {
   nextPageHref,
 } = Astro.props;
 
-const siteName = 'Insieme Salute Toscana';
-const canonical = canonicalUrl ?? Astro.url.href;
-const fullTitle = title === siteName ? title : `${title} — ${siteName}`;
+// Per-site config — all read at build time from Cloudflare Pages env
+// vars (PUBLIC_* names so Astro exposes them to client-side code where
+// needed). Sensible defaults so a fresh consumer site builds even
+// without setting any of them.
+//
+// Set in `domains/<slug>.yaml::cloudflare.pages_env` and project them
+// into the CF Pages project's environment variables (production +
+// preview). See template README for the full list and what each one
+// gates.
+const cfg = {
+  siteName:           import.meta.env.PUBLIC_SITE_NAME           ?? 'Site',
+  siteShortName:      import.meta.env.PUBLIC_SITE_SHORT_NAME     ?? import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+  themeColor:         import.meta.env.PUBLIC_THEME_COLOR         ?? '#0c1a3a',
+  language:           import.meta.env.PUBLIC_LANGUAGE            ?? 'it',
+  ogLocale:           import.meta.env.PUBLIC_OG_LOCALE           ?? 'it_IT',
 
-// Push-notification client config — resolved at build time from env.
-// Set PUBLIC_VAPID_KEY in Cloudflare Pages env vars for the Worker to
-// pair with. PUBLIC_PUSH_API defaults to /api/push/subscribe (handled
-// by the Cloudflare Worker route).
-const pushConfig = {
-  vapidPublicKey: import.meta.env.PUBLIC_VAPID_KEY ?? '',
-  pushApi: import.meta.env.PUBLIC_PUSH_API ?? '/api/push/subscribe',
+  // Google services — empty string disables the script entirely.
+  gaId:               import.meta.env.PUBLIC_GA_ID               ?? '',
+  adsenseClient:      import.meta.env.PUBLIC_ADSENSE_CLIENT      ?? '',
+
+  // CMP / cookie banner. The bundled /consent.js is the default; set
+  // PUBLIC_CMP_PROVIDER to 'none' to disable, 'cookiebot' to load
+  // Cookiebot, etc. PUBLIC_CMP_ID is the provider's site/account id.
+  cmpProvider:        import.meta.env.PUBLIC_CMP_PROVIDER        ?? 'consent.js',
+  cmpId:              import.meta.env.PUBLIC_CMP_ID              ?? '',
+  cmpCookieName:      import.meta.env.PUBLIC_CMP_COOKIE_NAME     ?? 'site_consent',
+  cmpStorageKey:      import.meta.env.PUBLIC_CMP_STORAGE_KEY     ?? 'site_consent',
+
+  // Push notifications.
+  pushEnabled:       (import.meta.env.PUBLIC_PUSH_ENABLED       ?? 'true').toLowerCase() === 'true',
+  vapidPublicKey:     import.meta.env.PUBLIC_VAPID_KEY           ?? '',
+  pushApi:            import.meta.env.PUBLIC_PUSH_API            ?? '/api/push/subscribe',
 };
+
+const canonical = canonicalUrl ?? Astro.url.href;
+const fullTitle = title === cfg.siteName ? title : `${title} — ${cfg.siteName}`;
+
+const pushConfig = cfg.pushEnabled && cfg.vapidPublicKey
+  ? { vapidPublicKey: cfg.vapidPublicKey, pushApi: cfg.pushApi }
+  : null;
+
+const consentConfig = cfg.cmpProvider === 'consent.js'
+  ? {
+      version: 1,
+      cookieName: cfg.cmpCookieName,
+      storageKey: cfg.cmpStorageKey,
+      policyUrl: '/cookie-policy/',
+      privacyUrl: '/privacy-policy/',
+      categories: {
+        necessary: {
+          required: true,
+          label: 'Necessari',
+          description: 'Indispensabili per il funzionamento del sito. Non raccolgono dati personali e non richiedono consenso.',
+        },
+        preferences: {
+          required: false,
+          label: 'Preferenze',
+          description: 'Memorizzano preferenze e abilitano contenuti incorporati da terze parti (es. video YouTube, Google Maps).',
+        },
+        analytics: {
+          required: false,
+          label: 'Analitici',
+          description: 'Misurano traffico e comportamento degli utenti tramite Google Analytics 4.',
+        },
+        marketing: {
+          required: false,
+          label: 'Marketing',
+          description: 'Attivano pubblicità personalizzata e remarketing tramite Google Ads.',
+        },
+      },
+      texts: {
+        title: 'Preferenze privacy',
+        description: 'Utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per finalità analitiche e di marketing. Puoi liberamente prestare, rifiutare o revocare il consenso in qualsiasi momento.',
+        acceptAll: 'Accetta tutto',
+        rejectAll: 'Rifiuta tutto',
+        customize: 'Personalizza',
+        save: 'Salva e chiudi',
+        settings: 'Impostazioni cookie',
+      },
+    }
+  : null;
 ---
 
 <!doctype html>
-<html lang="it">
+<html lang={cfg.language}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -59,7 +128,8 @@ const pushConfig = {
     {prevPageHref && <link rel="prev" href={prevPageHref} />}
     {nextPageHref && <link rel="next" href={nextPageHref} />}
 
-    <!-- Font Preloads -->
+    <!-- Font Preloads (Blinker is the template default; override per site
+         by shipping your own /fonts/ and CSS @font-face rules). -->
     <link
       rel="preload"
       href="/fonts/blinker-700-latin.woff2"
@@ -81,8 +151,8 @@ const pushConfig = {
     <meta property="og:image" content={ogImage} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
-    <meta property="og:locale" content="it_IT" />
-    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content={cfg.ogLocale} />
+    <meta property="og:site_name" content={cfg.siteName} />
     {publishedTime && <meta property="article:published_time" content={publishedTime} />}
     {modifiedTime && <meta property="article:modified_time" content={modifiedTime} />}
     {authorName && <meta property="article:author" content={authorName} />}
@@ -99,98 +169,84 @@ const pushConfig = {
 
     <!-- PWA manifest (required by iOS Safari for Web Push) -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#0c1a3a" />
+    <meta name="theme-color" content={cfg.themeColor} />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Insieme" />
+    <meta name="apple-mobile-web-app-title" content={cfg.siteShortName} />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 
-    <!-- Google Consent Mode v2 — default-deny everything except security_storage.
-         MUST run before any Google script loads. Cookie consent JS will
-         re-issue an 'update' once the user makes a choice (or restores their
-         saved state on a return visit). -->
-    <script is:inline>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      window.gtag = window.gtag || gtag;
-      gtag('consent', 'default', {
-        ad_storage:              'denied',
-        ad_user_data:            'denied',
-        ad_personalization:      'denied',
-        analytics_storage:       'denied',
-        functionality_storage:   'denied',
-        personalization_storage: 'denied',
-        security_storage:        'granted',
-      });
-    </script>
+    {/* Google Consent Mode v2 — default-deny everything except security_storage.
+        MUST run before any Google script loads. CMP JS re-issues an 'update'
+        once the user makes a choice. Skip the default-deny block if there's
+        no Google integration enabled (gaId AND adsenseClient both empty). */}
+    {(cfg.gaId || cfg.adsenseClient) && (
+      <script is:inline>
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          window.gtag = window.gtag || gtag;
+          gtag('consent', 'default', {
+            ad_storage:              'denied',
+            ad_user_data:            'denied',
+            ad_personalization:      'denied',
+            analytics_storage:       'denied',
+            functionality_storage:   'denied',
+            personalization_storage: 'denied',
+            security_storage:        'granted',
+          });
+        `}
+      </script>
+    )}
 
-    <!-- Cookie consent config + script -->
-    <script is:inline define:vars={{ IST_CONSENT_CONFIG: {
-      version: 1,
-      cookieName: 'ist_consent',
-      storageKey: 'ist_consent',
-      policyUrl: '/cookie-policy/',
-      privacyUrl: '/privacy-policy/',
-      categories: {
-        necessary: {
-          required: true,
-          label: 'Necessari',
-          description: 'Indispensabili per il funzionamento del sito. Non raccolgono dati personali e non richiedono consenso.',
-        },
-        preferences: {
-          required: false,
-          label: 'Preferenze',
-          description: 'Memorizzano preferenze e abilitano contenuti incorporati da terze parti (es. video YouTube, Google Maps). Dati trattati in USA da Google LLC.',
-        },
-        analytics: {
-          required: false,
-          label: 'Analitici',
-          description: 'Misurano traffico e comportamento degli utenti tramite Google Analytics 4. Dati trattati in USA da Google LLC.',
-        },
-        marketing: {
-          required: false,
-          label: 'Marketing',
-          description: 'Attivano pubblicità personalizzata e remarketing tramite Google Ads e Facebook Pixel. Dati trattati in USA.',
-        },
-      },
-      texts: {
-        title: 'Preferenze privacy',
-        description: 'Noi e terze parti selezionate utilizziamo cookie o tecnologie simili per finalità tecniche e, con il tuo consenso, anche per finalità analitiche (Google Analytics) e di marketing (Google Ads). Puoi liberamente prestare, rifiutare o revocare il consenso in qualsiasi momento.',
-        acceptAll: 'Accetta tutto',
-        rejectAll: 'Rifiuta tutto',
-        customize: 'Personalizza',
-        save: 'Salva e chiudi',
-        settings: 'Impostazioni cookie',
-      },
-    } }}>
-      window.IST_CONSENT_CONFIG = IST_CONSENT_CONFIG;
-    </script>
-    <script src="/consent.js" defer></script>
+    {/* Cookie consent — bundled JS-driven banner. Set
+        PUBLIC_CMP_PROVIDER=none to skip; or =cookiebot etc. to load
+        a different vendor (you'll need to inject their script
+        elsewhere). */}
+    {consentConfig && (
+      <>
+        <script is:inline define:vars={{ SITE_CONSENT_CONFIG: consentConfig }}>
+          {`window.SITE_CONSENT_CONFIG = SITE_CONSENT_CONFIG;`}
+        </script>
+        <script src="/consent.js" defer></script>
+      </>
+    )}
 
-    <!-- Push notifications opt-in. VAPID public key is wired at deploy time
-         via PUBLIC_VAPID_KEY in Cloudflare env vars (see workers/push/README). -->
-    <script is:inline define:vars={{ IST_PUSH_CONFIG: pushConfig }}>
-      window.IST_PUSH_CONFIG = IST_PUSH_CONFIG;
-    </script>
-    <script src="/push.js" defer></script>
+    {/* Web Push opt-in. VAPID public key + push API URL come from
+        PUBLIC_VAPID_KEY / PUBLIC_PUSH_API. Skipped entirely when
+        PUBLIC_PUSH_ENABLED=false or PUBLIC_VAPID_KEY is empty. */}
+    {pushConfig && (
+      <>
+        <script is:inline define:vars={{ SITE_PUSH_CONFIG: pushConfig }}>
+          {`window.SITE_PUSH_CONFIG = SITE_PUSH_CONFIG;`}
+        </script>
+        <script src="/push.js" defer></script>
+      </>
+    )}
 
-    <!-- Google Adsense -->
-    <script
-      async
-      src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4406471352837356"
-      crossorigin="anonymous"
-    ></script>
+    {/* Google AdSense — auto-ads loader. Only injected when
+        PUBLIC_ADSENSE_CLIENT is set. The site MUST also serve ads.txt
+        listing the same client; the template's /ads.txt route handles
+        that. */}
+    {cfg.adsenseClient && (
+      <script
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${cfg.adsenseClient}`}
+        crossorigin="anonymous"
+      ></script>
+    )}
 
-    <!-- Google Analytics (GA4) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-V4CM2EFKR7"
-    ></script>
-    <script is:inline>
-      gtag('js', new Date());
-      gtag('config', 'G-V4CM2EFKR7');
-    </script>
+    {/* Google Analytics 4. Skipped if PUBLIC_GA_ID is empty. */}
+    {cfg.gaId && (
+      <>
+        <script async src={`https://www.googletagmanager.com/gtag/js?id=${cfg.gaId}`}></script>
+        <script is:inline define:vars={{ GA_ID: cfg.gaId }}>
+          {`gtag('js', new Date()); gtag('config', GA_ID);`}
+        </script>
+      </>
+    )}
   </head>
   <body class={bodyClass}>
     <slot />
-    <div id="ist-consent-root"></div>
+    <div id="site-consent-root"></div>
   </body>
 </html>

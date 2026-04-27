@@ -5,11 +5,11 @@
 (function () {
   'use strict';
 
-  var config = window.IST_CONSENT_CONFIG || {};
+  var config = window.SITE_CONSENT_CONFIG || {};
   if (!config || !config.version) return;
 
-  var STORAGE_KEY = config.storageKey || 'ist_consent';
-  var COOKIE_NAME = config.cookieName || 'ist_consent';
+  var STORAGE_KEY = config.storageKey || 'site_consent';
+  var COOKIE_NAME = config.cookieName || 'site_consent';
   var VERSION = Number(config.version || 1);
 
   // ── State ───────────────────────────────────────────────────
@@ -135,7 +135,7 @@
 
   // ── Render banner + modal ──────────────────────────────────
   function renderUI() {
-    var root = document.getElementById('ist-consent-root');
+    var root = document.getElementById('site-consent-root');
     if (!root) return;
 
     var state = loadState();
@@ -224,7 +224,7 @@
 
   // ── Event wiring ───────────────────────────────────────────
   function bindUI() {
-    var root = document.getElementById('ist-consent-root');
+    var root = document.getElementById('site-consent-root');
     if (!root) return;
 
     root.addEventListener('click', function (e) {

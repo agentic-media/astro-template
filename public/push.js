@@ -21,7 +21,7 @@
 (function () {
   'use strict';
 
-  var config = window.IST_PUSH_CONFIG || {};
+  var config = window.SITE_PUSH_CONFIG || {};
   var VAPID_KEY = config.vapidPublicKey || '';
   var PUSH_API  = config.pushApi || '/api/push/subscribe';
   var STORAGE_KEY = 'ist_push_decision';
