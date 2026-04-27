@@ -11,8 +11,18 @@ const topics = [
 ];
 
 const currentPath = Astro.url.pathname;
-interface Props { logoTop?: string; logoBottom?: string; siteName?: string }
-const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.props as Props;
+interface Props {
+  logoTop?: string;
+  logoMiddle?: string;
+  logoBottom?: string;
+  siteName?: string;
+}
+const {
+  logoTop = 'BRAND',
+  logoMiddle = '',
+  logoBottom = 'TEMPLATE',
+  siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+} = Astro.props as Props;
 
 ---
 
@@ -22,7 +32,7 @@ const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.
       <!-- CSS Wordmark Logo -->
       <a href="/" class="ist-logo" aria-label={`${siteName} - Homepage`}>
         <span class="ist-logo__top">{logoTop}</span>
-        <span class="ist-logo__salute">SALUTE</span>
+        {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
         <span class="ist-logo__bottom">{logoBottom}</span>
       </a>
 

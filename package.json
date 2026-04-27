@@ -38,5 +38,8 @@
     "@astrojs/mdx": "^5.0.4",
     "@astrojs/sitemap": "^3.7.2",
     "@astrojs/rss": "^4.0.18"
+  },
+  "scripts": {
+    "postinstall": "node scripts/postinstall.mjs"
   }
 }

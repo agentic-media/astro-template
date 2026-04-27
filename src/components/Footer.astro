@@ -19,11 +19,20 @@ const links = [
   { href: '/feed.xml', label: 'RSS Feed' },
 ];
 
-const currentYear = new Date().getFullYear();
-interface Props { logoTop?: string; logoBottom?: string; siteName?: string }
-const { logoTop = 'BRAND', logoBottom = 'TEMPLATE', siteName = 'Site' } = Astro.props as Props;
-const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
-const siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '';
+interface Props {
+  logoTop?: string;
+  logoMiddle?: string;
+  logoBottom?: string;
+  siteName?: string;
+  siteDescription?: string;
+}
+const {
+  logoTop = 'BRAND',
+  logoMiddle = '',
+  logoBottom = 'TEMPLATE',
+  siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+  siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
+} = Astro.props as Props;
 const currentYear = new Date().getFullYear();
 ---
 
@@ -34,7 +43,7 @@ const currentYear = new Date().getFullYear();
       <div class="ist-footer__brand">
         <a href="/" class="ist-logo ist-footer__logo" aria-label={siteName}>
           <span class="ist-logo__top">{logoTop}</span>
-          <span class="ist-logo__salute">SALUTE</span>
+          {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
           <span class="ist-logo__bottom">{logoBottom}</span>
         </a>
         <p class="ist-footer__lede">
