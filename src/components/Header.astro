@@ -1,14 +1,22 @@
 ---
-const topics = [
-  { slug: 'relazioni', label: 'Relazioni e comunicazione' },
-  { slug: 'famiglia', label: 'Famiglia e genitorialità' },
-  { slug: 'benessere-mentale', label: 'Benessere mentale' },
-  { slug: 'lavoro', label: 'Lavoro e identità' },
-  { slug: 'vita-digitale', label: 'Vita digitale' },
-  { slug: 'mezza-eta', label: 'Mezza età' },
-  { slug: 'adolescenza', label: 'Adolescenza e giovani' },
-  { slug: 'salute-corpo', label: 'Salute e corpo' },
-];
+// Topic list drives the header nav and the Sidebar's "argomenti" panel.
+// Each consumer site overrides via PUBLIC_SITE_TOPICS — a JSON array of
+// `{slug,label}` (and optional `description`). Falls back to a small
+// generic placeholder so a fresh site builds without configuring this.
+function readTopics(): Array<{ slug: string; label: string; description?: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { slug: 'argomento-1', label: 'Argomento 1' },
+    { slug: 'argomento-2', label: 'Argomento 2' },
+    { slug: 'argomento-3', label: 'Argomento 3' },
+  ];
+}
 
 const currentPath = Astro.url.pathname;
 interface Props {
@@ -16,12 +24,15 @@ interface Props {
   logoMiddle?: string;
   logoBottom?: string;
   siteName?: string;
+  /** Override the env-driven topic list for this render. */
+  topics?: Array<{ slug: string; label: string; description?: string }>;
 }
 const {
   logoTop = 'BRAND',
   logoMiddle = '',
   logoBottom = 'TEMPLATE',
   siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+  topics = readTopics(),
 } = Astro.props as Props;
 
 ---

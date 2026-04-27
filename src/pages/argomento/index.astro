@@ -4,64 +4,25 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import { getCollection } from 'astro:content';
 
-const topics = [
-  {
-    slug: 'relazioni',
-    label: 'Relazioni e comunicazione',
-    icon: '💬',
-    description:
-      'Come costruire e coltivare relazioni sane, comunicare meglio con il partner, amici e colleghi.',
-  },
-  {
-    slug: 'famiglia',
-    label: 'Famiglia e genitorialità',
-    icon: '👨‍👩‍👧',
-    description:
-      'Genitorialità consapevole, dinamiche familiari, adolescenza in famiglia e molto altro.',
-  },
-  {
-    slug: 'benessere-mentale',
-    label: 'Benessere mentale',
-    icon: '🧠',
-    description:
-      'Ansia, stress, autostima, mindfulness: strumenti concreti per la tua salute psicologica.',
-  },
-  {
-    slug: 'lavoro',
-    label: 'Lavoro e identità',
-    icon: '💼',
-    description:
-      'Burnout, soddisfazione professionale, cambi di carriera e l\'identità che costruiamo nel lavoro.',
-  },
-  {
-    slug: 'vita-digitale',
-    label: 'Vita digitale',
-    icon: '📱',
-    description:
-      'Social media, dipendenze digitali, relazioni online: come navigare il mondo connesso con consapevolezza.',
-  },
-  {
-    slug: 'mezza-eta',
-    label: 'Mezza età',
-    icon: '🔄',
-    description:
-      'Crisi di mezza età, bilanci di vita, nuovi inizi: riflessioni per chi si trova a un crocevia.',
-  },
-  {
-    slug: 'adolescenza',
-    label: 'Adolescenza e giovani',
-    icon: '🌱',
-    description:
-      'Crescita emotiva, identità giovanile, sfide dell\'adolescenza vista da dentro e da fuori.',
-  },
-  {
-    slug: 'salute-corpo',
-    label: 'Salute e corpo',
-    icon: '🏃',
-    description:
-      'Il legame tra mente e corpo: sonno, alimentazione, movimento fisico e benessere psicologico.',
-  },
-];
+// Topic list comes from PUBLIC_SITE_TOPICS (a JSON array of
+// {slug,label,description?,icon?}). Falls back to a generic
+// placeholder list — set the env var per site for real labels.
+function readTopics(): Array<{ slug: string; label: string; icon?: string; description?: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { slug: 'argomento-1', label: 'Argomento 1', description: 'Lorem ipsum dolor sit amet.' },
+    { slug: 'argomento-2', label: 'Argomento 2', description: 'Sed do eiusmod tempor.' },
+    { slug: 'argomento-3', label: 'Argomento 3', description: 'Ut enim ad minim veniam.' },
+  ];
+}
+
+const topics = readTopics();
 
 // Count articles per topic
 const allArticles = await getCollection('articles');
@@ -104,7 +65,7 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
               style="background:var(--base-2); border-radius:var(--radius-card); padding:28px 24px; text-decoration:none; display:flex; flex-direction:column; gap:10px; transition:transform 0.2s, box-shadow 0.2s;"
               class="ist-topic-card"
             >
-              <span style="font-size:2rem;" aria-hidden="true">{topic.icon}</span>
+              {topic.icon && <span style="font-size:2rem;" aria-hidden="true">{topic.icon}</span>}
               <h2 style="font-size:1.1rem; font-weight:700; color:var(--navy); margin:0;">
                 {topic.label}
               </h2>

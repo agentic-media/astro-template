@@ -1,14 +1,18 @@
 ---
-const topics = [
-  { slug: 'relazioni', label: 'Relazioni e comunicazione' },
-  { slug: 'famiglia', label: 'Famiglia e genitorialità' },
-  { slug: 'benessere-mentale', label: 'Benessere mentale' },
-  { slug: 'lavoro', label: 'Lavoro e identità' },
-  { slug: 'vita-digitale', label: 'Vita digitale' },
-  { slug: 'mezza-eta', label: 'Mezza età' },
-  { slug: 'adolescenza', label: 'Adolescenza e giovani' },
-  { slug: 'salute-corpo', label: 'Salute e corpo' },
-];
+function readTopics(): Array<{ slug: string; label: string; description?: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_TOPICS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { slug: 'argomento-1', label: 'Argomento 1' },
+    { slug: 'argomento-2', label: 'Argomento 2' },
+    { slug: 'argomento-3', label: 'Argomento 3' },
+  ];
+}
 
 const links = [
   { href: '/', label: 'Home' },
@@ -25,6 +29,7 @@ interface Props {
   logoBottom?: string;
   siteName?: string;
   siteDescription?: string;
+  topics?: Array<{ slug: string; label: string; description?: string }>;
 }
 const {
   logoTop = 'BRAND',
@@ -32,6 +37,7 @@ const {
   logoBottom = 'TEMPLATE',
   siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
   siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
+  topics = readTopics(),
 } = Astro.props as Props;
 const currentYear = new Date().getFullYear();
 ---
