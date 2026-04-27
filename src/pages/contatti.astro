@@ -12,6 +12,20 @@ const breadcrumbItems = [
 
 const CONTACT_EMAIL = siteConfig.contact.email;
 const siteName = siteConfig.identity.name;
+
+// Contact form provider — see site-config.ts integrations.contact for shape.
+// 'mailto' is the legacy/no-config fallback; 'formspree' / 'tally' / 'web3forms'
+// all post a urlencoded body to a hosted endpoint and trust the vendor for
+// spam handling, delivery, and storage. We never persist submissions in our
+// own DB — see the original decision in BACKLOG.md (insieme go-live).
+const contact = siteConfig.integrations.contact;
+const useHostedForm =
+  contact.provider !== 'mailto' && contact.provider !== 'none' && Boolean(contact.endpoint);
+const formAction = useHostedForm
+  ? contact.endpoint
+  : `mailto:${CONTACT_EMAIL}`;
+const formEnctype = useHostedForm ? 'application/x-www-form-urlencoded' : 'text/plain';
+const showInlineConfirmation = Astro.url.searchParams.get('sent') === '1';
 ---
 
 <Base
@@ -42,13 +56,33 @@ const siteName = siteConfig.identity.name;
             Invia un messaggio
           </h2>
 
+          {showInlineConfirmation && (
+            <div role="status" style="background:var(--base-2); border-left:4px solid var(--magenta); padding:16px 20px; margin-bottom:24px; border-radius:6px;">
+              <p style="margin:0; color:var(--navy); font-size:0.95rem;">
+                Grazie! Il tuo messaggio è stato inviato. Ti risponderemo entro 2 giorni lavorativi.
+              </p>
+            </div>
+          )}
+
           <form
             class="ist-form"
             method="POST"
-            action={`mailto:${CONTACT_EMAIL}`}
-            enctype="text/plain"
+            action={formAction}
+            enctype={formEnctype}
             id="contact-form"
           >
+            {/* Formspree honeypot — bots fill this, humans don't. */}
+            {contact.provider === 'formspree' && (
+              <input type="text" name="_gotcha" style="display:none" tabindex="-1" autocomplete="off" />
+            )}
+            {/* Where Formspree sends the user after success. */}
+            {useHostedForm && (
+              <input type="hidden" name="_redirect" value={new URL(contact.successPath, Astro.site).toString()} />
+            )}
+            {/* Subject for the operator's inbox. */}
+            {useHostedForm && (
+              <input type="hidden" name="_subject" value={`Nuovo messaggio dal sito ${siteName}`} />
+            )}
             <div class="ist-form-group">
               <label class="ist-form-label" for="cf-name">Nome e cognome *</label>
               <input

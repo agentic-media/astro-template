@@ -89,6 +89,21 @@ export const SiteConfigSchema = z.object({
       vapidPublicKey: z.string().default(''),
       pushApi: z.string().default('/api/push/subscribe'),
     }).default({}),
+    contact: z.object({
+      // 'formspree' | 'tally' | 'web3forms' | 'mailto' | 'none'.
+      // 'mailto' falls back to a mailto: action (no JS, opens user's MUA).
+      // 'none' suppresses the form entirely; only the email/info column renders.
+      provider: z.enum(['formspree', 'tally', 'web3forms', 'mailto', 'none']).default('mailto'),
+      // Full POST endpoint for hosted form services (e.g.
+      // 'https://formspree.io/f/xxxxxxx'). Required when provider is set to a
+      // service; ignored for 'mailto' / 'none'.
+      endpoint: z.string().default(''),
+      // Path the user lands on after a successful submit. Set to a
+      // dedicated thank-you page if you want analytics (`/contatti/grazie/`).
+      // The default keeps them on /contatti/ with a `?sent=1` query param so
+      // the page can render an inline confirmation banner.
+      successPath: z.string().default('/contatti/?sent=1'),
+    }).default({}),
   }).default({}),
   robots: z.object({
     disallow: z.array(z.string()).default([]),
