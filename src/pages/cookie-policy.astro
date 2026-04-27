@@ -14,8 +14,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 ---
 
 <Base
-  title=`Cookie Policy — ${siteName}`
-  description="Informativa sull'uso dei cookie di ${siteName}: tipologie di cookie utilizzati e come gestirli."
+  title={`Cookie Policy — ${siteName}`}
+  description={`Informativa sull'uso dei cookie di ${siteName}: tipologie di cookie utilizzati e come gestirli.`}
   canonicalUrl={new URL("/cookie-policy/", Astro.site).toString()}
 >
   <Header />

@@ -11,12 +11,13 @@ const breadcrumbItems = [
 
 const lastUpdated = '2024-01-01';
 const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
+const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL ?? 'redazione@example.com';
 ---
 
 <Base
-  title=`Privacy Policy — ${siteName}`
-  description="Informativa sulla privacy di ${siteName}: come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali."
-  canonicalUrl={new URL("/privacy-policy/", Astro.site).toString()}
+  title={`Privacy Policy — ${siteName}`}
+  description={`Informativa sulla privacy di ${siteName}: come raccogliamo, utilizziamo e proteggiamo i tuoi dati personali.`}
+  canonicalUrl={new URL('/privacy-policy/', Astro.site).toString()}
 >
   <Header />
 
@@ -37,8 +38,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
         <h2>1. Titolare del trattamento</h2>
         <p>
           Il titolare del trattamento dei dati personali è la redazione di
-          ${siteName}, contattabile all'indirizzo email
-          <a href="mailto:${CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.
+          {siteName}, contattabile all'indirizzo email
+          <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
         </p>
 
         <h2>2. Dati raccolti</h2>
@@ -74,7 +75,7 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
           In conformità al Regolamento UE 2016/679 (GDPR), hai diritto di
           accedere ai tuoi dati, rettificarli, cancellarli, limitarne il
           trattamento e opporti al trattamento. Per esercitare questi diritti,
-          scrivici a <a href="mailto:${CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.
+          scrivici a <a href={`mailto:${contactEmail}`}>{contactEmail}</a>.
         </p>
 
         <h2>6. Base giuridica</h2>

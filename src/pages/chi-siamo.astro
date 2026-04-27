@@ -24,8 +24,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 ---
 
 <Base
-  title=`Chi siamo — ${siteName}`
-  description="Scopri il team di ${siteName}: psicologi e professionisti della salute che scrivono per aiutarti a stare meglio ogni giorno."
+  title={`Chi siamo — ${siteName}`}
+  description={`Scopri il team di ${siteName}: psicologi e professionisti della salute che scrivono per aiutarti a stare meglio ogni giorno.`}
   canonicalUrl={new URL("/chi-siamo/", Astro.site).toString()}
 >
   <Header />
@@ -40,7 +40,7 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
       <div class="ist-page-hero">
         <h1 class="ist-page-hero__title">Chi siamo</h1>
         <p class="ist-page-hero__desc">
-          ${siteName} nasce dalla convinzione che l'informazione psicologica
+          {siteName} nasce dalla convinzione che l'informazione psicologica
           di qualità debba essere accessibile a tutti. Il nostro team è composto da
           professionisti accomunati
           dalla passione per la divulgazione responsabile.
