@@ -5,6 +5,13 @@ import Footer from '../components/Footer.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import { getCollection } from 'astro:content';
 
+// This is the template-default chi-siamo. It's a structural scaffold —
+// breadcrumbs, page hero, team grid from the authors collection,
+// editorial-values list — with placeholder Lorem-ipsum copy. Each
+// consuming site SHOULD ship its own /src/pages/chi-siamo.astro to
+// override this with site-specific copy. Astro project routes win
+// over the integration's injected route.
+
 const authors = await getCollection('authors');
 
 function getInitials(name: string): string {
@@ -25,8 +32,8 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 
 <Base
   title={`Chi siamo — ${siteName}`}
-  description={`Scopri il team di ${siteName}: psicologi e professionisti della salute che scrivono per aiutarti a stare meglio ogni giorno.`}
-  canonicalUrl={new URL("/chi-siamo/", Astro.site).toString()}
+  description={`Scopri il team di ${siteName}.`}
+  canonicalUrl={new URL('/chi-siamo/', Astro.site).toString()}
 >
   <Header />
 
@@ -36,95 +43,57 @@ const siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site';
 
   <main>
     <div class="ist-container" style="padding-bottom:60px;">
-      <!-- Page intro -->
       <div class="ist-page-hero">
         <h1 class="ist-page-hero__title">Chi siamo</h1>
         <p class="ist-page-hero__desc">
-          {siteName} nasce dalla convinzione che l'informazione psicologica
-          di qualità debba essere accessibile a tutti. Il nostro team è composto da
-          professionisti accomunati
-          dalla passione per la divulgazione responsabile.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Override <code>src/pages/chi-siamo.astro</code> in your site
+          repo to replace this scaffold with your real copy.
         </p>
       </div>
 
-      <!-- Mission section -->
       <section style="background:var(--base-2); border-radius:var(--radius-card); padding:40px; margin-bottom:48px;">
         <h2 style="font-size:1.4rem; font-weight:700; color:var(--navy); margin-bottom:20px;">
           La nostra missione
         </h2>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
-          <div>
-            <p style="color:var(--contrast-2); line-height:1.7;">
-              Crediamo che prendersi cura della salute mentale non sia un lusso, ma
-              una necessità quotidiana. Scriviamo articoli basati sull'evidenza
-              scientifica, tradotti in un linguaggio comprensibile e applicabile
-              nella vita di tutti i giorni.
-            </p>
-          </div>
-          <div>
-            <p style="color:var(--contrast-2); line-height:1.7;">
-              Ogni articolo è firmato da un professionista reale, con nome, cognome
-              e specializzazione. Non pubblichiamo contenuti anonimi, non promettiamo
-              guarigioni miracolose, non vendiamo ansia. Solo informazione onesta.
-            </p>
-          </div>
+          <p style="color:var(--contrast-2); line-height:1.7;">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
+            eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          </p>
+          <p style="color:var(--contrast-2); line-height:1.7;">
+            Ut enim ad minim veniam, quis nostrud exercitation ullamco
+            laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
         </div>
       </section>
 
-      <!-- Team grid -->
-      <section>
-        <h2 style="font-size:1.4rem; font-weight:700; color:var(--navy); margin-bottom:32px;">
-          Il nostro team
-        </h2>
+      {authors.length > 0 && (
+        <section>
+          <h2 style="font-size:1.4rem; font-weight:700; color:var(--navy); margin-bottom:32px;">
+            Il nostro team
+          </h2>
 
-        <div class="ist-team-grid">
-          {authors.map((author) => (
-            <div class="ist-team-card">
-              <div class="ist-team-card__avatar">
-                {author.data.avatar ? (
-                  <img
-                    src={author.data.avatar}
-                    alt={`Foto di ${author.data.name}`}
-                    width="80"
-                    height="80"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div class="ist-team-card__avatar-initials">
-                    {getInitials(author.data.name)}
-                  </div>
-                )}
+          <div class="ist-team-grid">
+            {authors.map((author) => (
+              <div class="ist-team-card">
+                <div class="ist-team-card__avatar">
+                  {author.data.avatar ? (
+                    <img src={author.data.avatar} alt={`Foto di ${author.data.name}`} width="80" height="80" loading="lazy" />
+                  ) : (
+                    <div class="ist-team-card__avatar-initials">{getInitials(author.data.name)}</div>
+                  )}
+                </div>
+                <h3 class="ist-team-card__name">
+                  <a href={`/autore/${author.data.slug}/`}>{author.data.name}</a>
+                </h3>
+                <p class="ist-team-card__title">{author.data.title}</p>
+                <p class="ist-team-card__bio">{author.data.bioShort}</p>
               </div>
-
-              <h3 class="ist-team-card__name">
-                <a href={`/autore/${author.data.slug}/`}>{author.data.name}</a>
-              </h3>
-              <p class="ist-team-card__title">{author.data.title}</p>
-              <p class="ist-team-card__bio">{author.data.bioShort}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <!-- Editorial values -->
-      <section style="margin-top:56px; padding-top:48px; border-top:1px solid var(--hairline);">
-        <h2 style="font-size:1.4rem; font-weight:700; color:var(--navy); margin-bottom:28px;">
-          I nostri valori editoriali
-        </h2>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:24px;">
-          {[
-            { title: 'Trasparenza', text: 'Ogni articolo indica chiaramente chi lo ha scritto e le sue qualifiche professionali.' },
-            { title: 'Evidence-based', text: 'I nostri contenuti si basano su ricerche scientifiche verificate, non su opinioni.' },
-            { title: 'Accessibilità', text: 'Scientifico non deve significare incomprensibile. Scriviamo per tutti.' },
-            { title: 'Responsabilità', text: 'I nostri contenuti sono informativi. Non sostituiscono la consulenza professionale.' },
-          ].map((val) => (
-            <div style="background:var(--base-2); border-radius:var(--radius-card); padding:24px; border-left:3px solid var(--magenta);">
-              <h3 style="font-size:1rem; font-weight:700; color:var(--navy); margin-bottom:8px;">{val.title}</h3>
-              <p style="font-size:0.88rem; color:var(--contrast-2); line-height:1.55; margin:0;">{val.text}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   </main>
 

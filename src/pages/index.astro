@@ -28,13 +28,22 @@ const recentArticles = sortedArticles.slice(0, 5).map((a) => ({
   topic: a.data.topic,
 }));
 
-// WebSite JSON-LD schema
+// All hero copy is per-site via env. Empty defaults render no copy
+// rather than leaking template-author content.
+const siteName     = import.meta.env.PUBLIC_SITE_NAME      ?? 'Site';
+const siteDesc     = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '';
+const heroTagline  = import.meta.env.PUBLIC_SITE_TAGLINE   ?? '';
+const heroHeadline = import.meta.env.PUBLIC_HOME_HEADLINE  ?? siteName;
+const heroLede     = import.meta.env.PUBLIC_HOME_LEDE      ?? siteDesc;
+const emptyTitle   = import.meta.env.PUBLIC_HOME_EMPTY_TITLE ?? 'Nessun articolo ancora pubblicato.';
+const emptyBody    = import.meta.env.PUBLIC_HOME_EMPTY_BODY  ?? '';
+
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  name: import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
+  name: siteName,
   url: (Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'),
-  description: (import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ''),
+  description: siteDesc,
   inLanguage: (import.meta.env.PUBLIC_OG_LOCALE ?? 'it_IT').replace('_', '-'),
   potentialAction: {
     '@type': 'SearchAction',
@@ -48,33 +57,38 @@ const websiteSchema = {
 ---
 
 <Base
-  title={import.meta.env.PUBLIC_SITE_NAME ?? "Site"}
-  description={import.meta.env.PUBLIC_SITE_DESCRIPTION ?? ""}
+  title={siteName}
+  description={siteDesc}
 >
   <script type="application/ld+json" set:html={JSON.stringify(websiteSchema)} />
 
   <Header />
 
   <main>
-    <!-- Homepage hero strip -->
-    <div style="background: var(--navy); color: #fff; padding: 40px 0 32px;">
-      <div class="ist-container">
-        <p style="font-size:0.8rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--magenta); margin-bottom:10px;">
-          {import.meta.env.PUBLIC_SITE_TAGLINE ?? ""}
-        </p>
-        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px; max-width:18ch;">
-          Stare bene si impara
-        </h1>
-        <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6; font-size:1.05rem;">
-          Articoli scritti da psicologi e professionisti della salute per aiutarti a
-          capire le tue emozioni, migliorare le relazioni e prenderti cura di te.
-        </p>
+    {(heroTagline || heroHeadline || heroLede) && (
+      <div style="background: var(--navy); color: #fff; padding: 40px 0 32px;">
+        <div class="ist-container">
+          {heroTagline && (
+            <p style="font-size:0.8rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase; color:var(--magenta); margin-bottom:10px;">
+              {heroTagline}
+            </p>
+          )}
+          {heroHeadline && (
+            <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px; max-width:18ch;">
+              {heroHeadline}
+            </h1>
+          )}
+          {heroLede && (
+            <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6; font-size:1.05rem;">
+              {heroLede}
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    )}
 
     <div class="ist-container" style="padding-top:40px; padding-bottom:60px;">
       <div class="ist-layout-2col">
-        <!-- Articles main column -->
         <div>
           {articles.length > 0 ? (
             <div class="ist-card-grid">
@@ -94,15 +108,14 @@ const websiteSchema = {
             </div>
           ) : (
             <div style="background:var(--base-2); border-radius:var(--radius-card); padding:48px; text-align:center; color:var(--contrast-2);">
-              <p style="font-size:1.1rem; margin-bottom:8px;">Nessun articolo ancora pubblicato.</p>
-              <p style="font-size:0.9rem;">Torna presto — i nostri esperti stanno scrivendo per te.</p>
+              <p style="font-size:1.1rem; margin-bottom:8px;">{emptyTitle}</p>
+              {emptyBody && <p style="font-size:0.9rem;">{emptyBody}</p>}
             </div>
           )}
 
           <Pagination currentPage={currentPage} totalPages={totalPages} basePath="/" />
         </div>
 
-        <!-- Sidebar -->
         <aside aria-label="Barra laterale">
           <Sidebar recentArticles={recentArticles} />
         </aside>

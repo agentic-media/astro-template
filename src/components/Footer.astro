@@ -7,21 +7,29 @@ function readTopics(): Array<{ slug: string; label: string; description?: string
       if (Array.isArray(parsed)) return parsed;
     } catch { /* fall through */ }
   }
-  return [
-    { slug: 'argomento-1', label: 'Argomento 1' },
-    { slug: 'argomento-2', label: 'Argomento 2' },
-    { slug: 'argomento-3', label: 'Argomento 3' },
-  ];
+  return [];
 }
 
-const links = [
-  { href: '/', label: 'Home' },
-  { href: '/chi-siamo/', label: 'Chi siamo' },
-  { href: '/contatti/', label: 'Contatti' },
-  { href: '/privacy-policy/', label: 'Privacy Policy' },
-  { href: '/cookie-policy/', label: 'Cookie Policy' },
-  { href: '/feed.xml', label: 'RSS Feed' },
-];
+// Footer link list — fully driven by env. Default falls back to the
+// usual editorial-site links but the consumer can override via
+// PUBLIC_SITE_FOOTER_LINKS (JSON array of {href,label}).
+function readFooterLinks(): Array<{ href: string; label: string }> {
+  const raw = import.meta.env.PUBLIC_SITE_FOOTER_LINKS;
+  if (typeof raw === 'string' && raw.trim()) {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    } catch { /* fall through */ }
+  }
+  return [
+    { href: '/', label: 'Home' },
+    { href: '/chi-siamo/', label: 'Chi siamo' },
+    { href: '/contatti/', label: 'Contatti' },
+    { href: '/privacy-policy/', label: 'Privacy Policy' },
+    { href: '/cookie-policy/', label: 'Cookie Policy' },
+    { href: '/feed.xml', label: 'RSS Feed' },
+  ];
+}
 
 interface Props {
   logoTop?: string;
@@ -30,6 +38,15 @@ interface Props {
   siteName?: string;
   siteDescription?: string;
   topics?: Array<{ slug: string; label: string; description?: string }>;
+  links?: Array<{ href: string; label: string }>;
+  /** Optional disclaimer slot. Per-site copy lives in the consumer
+      site repo (e.g. via this prop or PUBLIC_FOOTER_DISCLAIMER). The
+      template ships no default — if both prop and env are empty the
+      strip just shows copyright + privacy/cookie links. */
+  disclaimer?: string;
+  copyrightHolder?: string;
+  topicsTitle?: string;
+  linksTitle?: string;
 }
 const {
   logoTop = 'BRAND',
@@ -38,6 +55,11 @@ const {
   siteName = import.meta.env.PUBLIC_SITE_NAME ?? 'Site',
   siteDescription = import.meta.env.PUBLIC_SITE_DESCRIPTION ?? '',
   topics = readTopics(),
+  links = readFooterLinks(),
+  disclaimer = import.meta.env.PUBLIC_FOOTER_DISCLAIMER ?? '',
+  copyrightHolder = import.meta.env.PUBLIC_COPYRIGHT_HOLDER ?? siteName,
+  topicsTitle = import.meta.env.PUBLIC_FOOTER_TOPICS_TITLE ?? 'Argomenti',
+  linksTitle = import.meta.env.PUBLIC_FOOTER_LINKS_TITLE ?? 'Collegamenti',
 } = Astro.props as Props;
 const currentYear = new Date().getFullYear();
 ---
@@ -52,39 +74,43 @@ const currentYear = new Date().getFullYear();
           {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
           <span class="ist-logo__bottom">{logoBottom}</span>
         </a>
-        <p class="ist-footer__lede">
-          {siteDescription}
-        </p>
+        {siteDescription && (
+          <p class="ist-footer__lede">
+            {siteDescription}
+          </p>
+        )}
       </div>
 
-      <!-- Topics column -->
-      <div>
-        <h3 class="ist-footer__col-title">Argomenti</h3>
-        <nav class="ist-footer__links" aria-label="Argomenti">
-          {topics.map((topic) => (
-            <a href={`/argomento/${topic.slug}/`}>{topic.label}</a>
-          ))}
-        </nav>
-      </div>
+      {topics.length > 0 && (
+        <div>
+          <h3 class="ist-footer__col-title">{topicsTitle}</h3>
+          <nav class="ist-footer__links" aria-label={topicsTitle}>
+            {topics.map((topic) => (
+              <a href={`/argomento/${topic.slug}/`}>{topic.label}</a>
+            ))}
+          </nav>
+        </div>
+      )}
 
-      <!-- Links column -->
-      <div>
-        <h3 class="ist-footer__col-title">Collegamenti</h3>
-        <nav class="ist-footer__links" aria-label="Link utili">
-          {links.map((link) => (
-            <a href={link.href}>{link.label}</a>
-          ))}
-        </nav>
-      </div>
+      {links.length > 0 && (
+        <div>
+          <h3 class="ist-footer__col-title">{linksTitle}</h3>
+          <nav class="ist-footer__links" aria-label={linksTitle}>
+            {links.map((link) => (
+              <a href={link.href}>{link.label}</a>
+            ))}
+          </nav>
+        </div>
+      )}
     </div>
 
-    <!-- Bottom strip -->
+    <!-- Bottom strip — no default disclaimer; consumer site owns it. -->
     <div class="ist-footer__bottom">
       <span>
-        &copy; {currentYear} {siteName}. Tutti i diritti riservati.
+        &copy; {currentYear} {copyrightHolder}.
       </span>
+      {disclaimer && <span>{disclaimer}</span>}
       <span>
-        I contenuti hanno scopo informativo e non sostituiscono il parere medico.
         <a href="/privacy-policy/">Privacy</a> ·
         <a href="/cookie-policy/">Cookie</a>
       </span>
