@@ -7,6 +7,12 @@ export interface Props {
   description: string;
   canonicalUrl?: string;
   ogImage?: string;
+  /** Article hero image. When set on `type="article"` pages, emitted as
+      `<link rel="preload" as="image" href={heroImage}>` so the LCP image
+      starts fetching alongside the HTML. Skips when missing or when
+      `type !== 'article'`. Pair with `fetchpriority="high"` on the
+      rendering `<img>`. */
+  heroImage?: string;
   publishedTime?: string;
   modifiedTime?: string;
   authorName?: string;
@@ -25,6 +31,7 @@ const {
   description,
   canonicalUrl,
   ogImage = '/og-default.jpg',
+  heroImage,
   publishedTime,
   modifiedTime,
   authorName,
@@ -138,6 +145,13 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
       : <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />}
     {prevPageHref && <link rel="prev" href={prevPageHref} />}
     {nextPageHref && <link rel="next" href={nextPageHref} />}
+
+    <!-- Article hero preload — fires the LCP image fetch alongside the
+         HTML. Only on type="article" pages with a hero set. Pair with
+         fetchpriority="high" on the rendering <img>. -->
+    {type === 'article' && heroImage && (
+      <link rel="preload" as="image" href={heroImage} fetchpriority="high" />
+    )}
 
     <!-- Font Preloads (Blinker is the template default; override per site
          by shipping your own /fonts/ and CSS @font-face rules). -->
