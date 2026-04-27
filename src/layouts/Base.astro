@@ -69,7 +69,11 @@ const cfg = {
 };
 
 const canonical = canonicalUrl ?? Astro.url.href;
-const fullTitle = title === cfg.siteName ? title : `${title} — ${cfg.siteName}`;
+// Append " — siteName" UNLESS the caller already included it (e.g.
+// passed `title={`Contatti — ${siteName}`}`). Avoids "Foo — Pesce — Pesce".
+const fullTitle = (title === cfg.siteName || title.endsWith(`— ${cfg.siteName}`))
+  ? title
+  : `${title} — ${cfg.siteName}`;
 
 const pushConfig = cfg.pushEnabled && cfg.vapidPublicKey
   ? { vapidPublicKey: cfg.vapidPublicKey, pushApi: cfg.pushApi }
