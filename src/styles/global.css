@@ -407,13 +407,23 @@ p {
 .ist-article-card__img-wrap {
   overflow: hidden;
   aspect-ratio: 16 / 9;
+  /* Letterbox bg for non-16:9 heroes (esp. legacy WP imports with
+     embedded title text — `cover` was clipping those). The hover
+     scale below stays subtle so contained images don't drift outside
+     the wrap. */
   background: var(--base-3);
 }
 
 .ist-article-card__img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Was `cover` — flipped to `contain` so legacy heroes that bake
+     title typography directly into the image (Tuscany, etc.) don't
+     get cropped at the edges. The card's aspect-ratio + bg colour
+     handle the letterbox/pillarbox space cleanly. AI-generated heroes
+     authored at 16:9 fit edge-to-edge anyway, so the visual cost is
+     zero on new content. */
+  object-fit: contain;
   transition: transform 0.3s ease;
 }
 
