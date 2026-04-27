@@ -160,6 +160,7 @@ const pageTitle = isFirstPage
   description={article.ogDescription ?? article.description}
   canonicalUrl={canonical}
   ogImage={article.heroImage}
+  heroImage={isFirstPage ? article.heroImage : undefined}
   publishedTime={article.publishedDate}
   modifiedTime={article.modifiedDate}
   authorName={article.author}
@@ -186,7 +187,11 @@ const pageTitle = isFirstPage
                   class="ist-single__hero"
                   src={article.heroImage}
                   alt={article.heroImageAlt ?? article.title}
+                  width="1600"
+                  height="900"
                   loading="eager"
+                  fetchpriority="high"
+                  decoding="async"
                   itemprop="image"
                 />
               ) : (
