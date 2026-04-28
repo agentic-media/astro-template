@@ -417,13 +417,13 @@ p {
 .ist-article-card__img {
   width: 100%;
   height: 100%;
-  /* Was `cover` — flipped to `contain` so legacy heroes that bake
-     title typography directly into the image (Tuscany, etc.) don't
-     get cropped at the edges. The card's aspect-ratio + bg colour
-     handle the letterbox/pillarbox space cleanly. AI-generated heroes
-     authored at 16:9 fit edge-to-edge anyway, so the visual cost is
-     zero on new content. */
-  object-fit: contain;
+  /* No object-fit: hero file is 16:9 and the wrap is 16:9, so the
+     image fills the box at native ratio. If a non-16:9 hero ever
+     lands (legacy import) it gets stretched — acceptable hold-the-
+     fort while the media.hero config knob lands (control-center
+     schemas/hero-dims-from-config.md). With one-source-of-truth
+     dims, the box and the image always agree by construction.
+     Letterbox bg on the wrap covers any aspect mismatch transiently. */
   transition: transform 0.3s ease;
 }
 
@@ -598,9 +598,13 @@ p {
 .ist-single__hero {
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: contain;
   display: block;
-  background: var(--base-3); /* letterbox bg if a non-16:9 hero ever lands */
+  background: var(--base-3); /* letterbox bg until media.hero config lands */
+  /* No object-fit: hero file is 16:9 and the box is 16:9 (matched by
+     construction once site.config.yaml media.hero is wired — see
+     control-center schemas/hero-dims-from-config.md). Native rendering
+     preserves the image; mismatched aspects stretch slightly — accepted
+     as the hold-the-fort while the config knob ships. */
 }
 
 .ist-single__hero-placeholder {
