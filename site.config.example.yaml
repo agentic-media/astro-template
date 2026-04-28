@@ -71,3 +71,18 @@ integrations:
 
 robots:
   disallow: []                          # paths to disallow in /robots.txt
+
+# Hero / image dimensions. ONE source of truth — propagated to:
+#   • this template's CSS (vars on :root, used by card + article hero)
+#   • the lordship's writer + agent-creative for in-run image generation
+#   • the publisher's astro-github validator (dim assertion + backfill)
+# See agentic-media/control-center/schemas/hero-dims-from-config.md.
+# Omit the block entirely to render at the defaults below — identical
+# to today's behaviour. Opt-in is editing this block (or a single key).
+media:
+  hero:
+    width:       1600              # int px
+    height:      900               # int px (aspect = width/height)
+    quality:     78                # 1..100
+    formats:     [webp]
+    derivatives: []                # e.g. [480, 960] for build-time srcset

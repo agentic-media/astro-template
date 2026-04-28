@@ -286,6 +286,15 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
         },
       })} />
     )}
+    {/* Hero dimensions as CSS custom properties on :root. ONE source of
+        truth (site.config.yaml::media.hero) propagated to the rendering
+        side; producers read the same block via skills/_hero_cfg.py.
+        See control-center/schemas/hero-dims-from-config.md §3.1. */}
+    <style is:global set:html={`:root{
+      --ist-hero-width: ${siteConfig.media.hero.width}px;
+      --ist-hero-height: ${siteConfig.media.hero.height}px;
+      --ist-hero-aspect: ${siteConfig.media.hero.width} / ${siteConfig.media.hero.height};
+    }`} />
   </head>
   <body class={bodyClass}>
     <slot />

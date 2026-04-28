@@ -113,6 +113,25 @@ export const SiteConfigSchema = z.object({
     middle: z.string().default(''),
     bottom: z.string().default('TEMPLATE'),
   }).default({}),
+  // Hero / image dimensions. ONE source of truth consumed by:
+  //   • this template (CSS vars on :root via the integration)
+  //   • the lordship's writer + agent-creative (in-run image generation)
+  //   • the publisher's astro-github validator (dim assertion + backfill)
+  // See agentic-media/control-center/schemas/hero-dims-from-config.md.
+  // Sites that omit this block render at the defaults below — identical
+  // to today's behaviour. Opt-in is a single block in site.config.yaml.
+  media: z.object({
+    hero: z.object({
+      width: z.number().int().positive().default(1600),
+      height: z.number().int().positive().default(900),
+      quality: z.number().int().min(1).max(100).default(78),
+      formats: z.array(z.enum(['webp'])).default(['webp']),
+      // List of widths (px) for build-time srcset. Empty = single-size.
+      // Producers (writer/agent-creative/wp-json-sync) emit one
+      // hero-{w}w.webp per width via emit_hero_set; downscale-only.
+      derivatives: z.array(z.number().int().positive()).default([]),
+    }).default({}),
+  }).default({}),
 });
 
 export type SiteConfig = z.infer<typeof SiteConfigSchema>;
