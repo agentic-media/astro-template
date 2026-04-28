@@ -597,14 +597,15 @@ p {
 
 .ist-single__hero {
   width: 100%;
-  aspect-ratio: 16 / 6;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
   display: block;
+  background: var(--base-3); /* letterbox bg if a non-16:9 hero ever lands */
 }
 
 .ist-single__hero-placeholder {
   width: 100%;
-  aspect-ratio: 16 / 6;
+  aspect-ratio: 16 / 9;
   background: var(--base-3);
   display: flex;
   align-items: center;
@@ -1679,15 +1680,11 @@ p {
   display: block;
 }
 
-.ist-single__hero {
-  width: 100%;
-  height: clamp(200px, 32vw, 360px);
-  object-fit: cover;
-  display: block;
-}
+/* (Canonical .ist-single__hero rule lives above near .ist-single — no override here.) */
 
 .ist-single__hero--empty {
-  height: 220px;
+  width: 100%;
+  aspect-ratio: 16 / 9;
   display: flex;
   align-items: center;
   justify-content: center;
