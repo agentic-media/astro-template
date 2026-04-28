@@ -406,7 +406,10 @@ p {
 
 .ist-article-card__img-wrap {
   overflow: hidden;
-  aspect-ratio: 16 / 9;
+  /* Aspect-ratio sourced from site.config.yaml::media.hero via the
+     integration (--ist-hero-aspect on :root). Falls back to 16/9 for
+     consumer sites that haven't deployed the integration upgrade yet. */
+  aspect-ratio: var(--ist-hero-aspect, 16 / 9);
   /* Letterbox bg for non-16:9 heroes (esp. legacy WP imports with
      embedded title text — `cover` was clipping those). The hover
      scale below stays subtle so contained images don't drift outside
@@ -597,9 +600,12 @@ p {
 
 .ist-single__hero {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  /* Aspect-ratio sourced from site.config.yaml::media.hero via the
+     integration (--ist-hero-aspect on :root). Falls back to 16/9 for
+     consumer sites that haven't deployed the integration upgrade yet. */
+  aspect-ratio: var(--ist-hero-aspect, 16 / 9);
   display: block;
-  background: var(--base-3); /* letterbox bg until media.hero config lands */
+  background: var(--base-3); /* letterbox bg if non-matching aspect ever lands */
   /* No object-fit: hero file is 16:9 and the box is 16:9 (matched by
      construction once site.config.yaml media.hero is wired — see
      control-center schemas/hero-dims-from-config.md). Native rendering
@@ -609,7 +615,7 @@ p {
 
 .ist-single__hero-placeholder {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ist-hero-aspect, 16 / 9);
   background: var(--base-3);
   display: flex;
   align-items: center;
@@ -1688,7 +1694,7 @@ p {
 
 .ist-single__hero--empty {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: var(--ist-hero-aspect, 16 / 9);
   display: flex;
   align-items: center;
   justify-content: center;
