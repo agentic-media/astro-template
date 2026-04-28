@@ -1,4 +1,5 @@
 ---
+import siteConfig from 'virtual:agentic-media/site-config';
 import TagPill from './TagPill.astro';
 
 export interface Props {
@@ -34,21 +35,58 @@ function formatDate(dateStr: string) {
 }
 
 const articleUrl = `/${topic}/${slug}/`;
+
+// Hero dims + derivatives come from site.config.yaml::media.hero (Phase 1).
+// When derivatives is non-empty, render <picture>/<source srcset> so the
+// browser can pick the right size; otherwise fall through to a single <img>
+// (today's behaviour, byte-identical on sites that haven't opted in).
+// See control-center/schemas/hero-dims-from-config.md §5.
+const heroWidth = siteConfig.media.hero.width;
+const heroHeight = siteConfig.media.hero.height;
+const heroDerivatives = siteConfig.media.hero.derivatives;
+const hasDerivatives = image != null && heroDerivatives.length > 0;
+const heroDir = image ? image.replace(/\/[^/]+$/, '') : '';
+const cardSrcset = hasDerivatives
+  ? [
+      ...heroDerivatives
+        .filter((w) => w < heroWidth)
+        .map((w) => `${heroDir}/hero-${w}w.webp ${w}w`),
+      `${image} ${heroWidth}w`,
+    ].join(', ')
+  : '';
+// 3-col grid → 2-col → 1-col across the std breakpoints.
+const cardSizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
 ---
 
 <article class="ist-article-card" itemscope itemtype="https://schema.org/Article">
   <a href={articleUrl} class="ist-article-card__img-wrap" tabindex="-1" aria-hidden="true">
     {image ? (
-      <img
-        class="ist-article-card__img"
-        src={image}
-        alt={title}
-        width="1600"
-        height="900"
-        loading="lazy"
-        decoding="async"
-        itemprop="image"
-      />
+      hasDerivatives ? (
+        <picture>
+          <source type="image/webp" srcset={cardSrcset} sizes={cardSizes} />
+          <img
+            class="ist-article-card__img"
+            src={image}
+            alt={title}
+            width={heroWidth}
+            height={heroHeight}
+            loading="lazy"
+            decoding="async"
+            itemprop="image"
+          />
+        </picture>
+      ) : (
+        <img
+          class="ist-article-card__img"
+          src={image}
+          alt={title}
+          width={heroWidth}
+          height={heroHeight}
+          loading="lazy"
+          decoding="async"
+          itemprop="image"
+        />
+      )
     ) : (
       <div class="ist-article-card__img-placeholder" aria-hidden="true">🌿</div>
     )}
