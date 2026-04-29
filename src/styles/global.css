@@ -420,13 +420,13 @@ p {
 .ist-article-card__img {
   width: 100%;
   height: 100%;
-  /* No object-fit: hero file is 16:9 and the wrap is 16:9, so the
-     image fills the box at native ratio. If a non-16:9 hero ever
-     lands (legacy import) it gets stretched — acceptable hold-the-
-     fort while the media.hero config knob lands (control-center
-     schemas/hero-dims-from-config.md). With one-source-of-truth
-     dims, the box and the image always agree by construction.
-     Letterbox bg on the wrap covers any aspect mismatch transiently. */
+  /* `contain` preserves the native aspect of the source hero —
+     legacy WP imports come at 3:2, 4:3, 16:10, etc., and any of
+     them displayed in a fixed 16:9 wrap would either stretch
+     (default `fill`) or crop (`cover`). The wrap's letterbox bg
+     covers any mismatch. Once heroes are emitted at the canonical
+     wrap aspect by construction, the bars vanish naturally. */
+  object-fit: contain;
   transition: transform 0.3s ease;
 }
 
@@ -605,12 +605,13 @@ p {
      consumer sites that haven't deployed the integration upgrade yet. */
   aspect-ratio: var(--ist-hero-aspect, 16 / 9);
   display: block;
-  background: var(--base-3); /* letterbox bg if non-matching aspect ever lands */
-  /* No object-fit: hero file is 16:9 and the box is 16:9 (matched by
-     construction once site.config.yaml media.hero is wired — see
-     control-center schemas/hero-dims-from-config.md). Native rendering
-     preserves the image; mismatched aspects stretch slightly — accepted
-     as the hold-the-fort while the config knob ships. */
+  background: var(--base-3); /* letterbox bg for non-matching aspect heroes */
+  /* `contain` preserves native aspect — see .ist-article-card__img
+     for the same fix on grid cards. Legacy WP imports use various
+     aspect ratios; this avoids the horizontal-stretch the default
+     `fill` produced. Letterbox bars vanish once heroes match the
+     wrap aspect by construction. */
+  object-fit: contain;
 }
 
 .ist-single__hero-placeholder {
