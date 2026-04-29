@@ -780,9 +780,25 @@ p {
   gap: 20px;
   background: var(--base);
   border-radius: var(--radius-card);
-  padding: 24px;
-  margin-top: 32px;
+  padding: 28px 32px;
+  /* Symmetric vertical breathing room on the article tail. The earlier rule
+     only set margin-top, leaving the box flush against whatever followed
+     (sources block, related cards, footer) on desktop where that flush-bottom
+     edge is visually cramped. Use logical margin-block so RTL locales pick
+     up the same spacing. */
+  margin-block: 40px;
   align-items: flex-start;
+}
+
+@media (max-width: 720px) {
+  .ist-author-box {
+    /* Mobile: keep the old tighter padding so the box doesn't dominate the
+       narrow column. Margin still gets a healthy 32px so the box visually
+       breathes. */
+    padding: 20px 18px;
+    gap: 16px;
+    margin-block: 32px;
+  }
 }
 
 .ist-author-box__avatar {
