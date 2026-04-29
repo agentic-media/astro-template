@@ -8,6 +8,7 @@ import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Sidebar from '../components/Sidebar.astro';
 import Sources from '../components/Sources.astro';
 import TagPill from '../components/TagPill.astro';
+import sourcesCache from 'virtual:agentic-media/sources-cache';
 import { getCollection } from 'astro:content';
 
 export interface ArticleFrontmatter {
@@ -24,6 +25,11 @@ export interface ArticleFrontmatter {
   heroImage?: string;
   heroImageAlt?: string;
   sources?: { url: string; title?: string; siteName?: string }[];
+  cited_sources?: {
+    source_id: string;
+    snippet?: string | null;
+    position: number;
+  }[];
   slug?: string;
   currentPage?: number;
   totalPages?: number;
@@ -85,6 +91,7 @@ function formatDate(dateStr: string) {
 
 const authorInitials = getInitials(article.author);
 const hasSources = (article.sources?.length ?? 0) > 0;
+const hasCitedSources = (article.cited_sources?.length ?? 0) > 0;
 
 // Sidebar data
 const allArticles = await getCollection('articles');
@@ -115,6 +122,31 @@ const breadcrumbItems = [
 const canonical = new URL(pageUrl(currentPage), Astro.site).toString();
 const prevPageHref = !isFirstPage ? new URL(pageUrl(currentPage - 1), Astro.site).toString() : null;
 const nextPageHref = !isLastPage ? new URL(pageUrl(currentPage + 1), Astro.site).toString() : null;
+
+// JSON-LD citation block — emitted on the last page of paginated
+// articles (where the sources block also renders) when cited_sources
+// is populated. Each citation references the original CreativeWork by
+// URL with the captured snippet as `description`. Schema.org's Article
+// type accepts `citation: CreativeWork[]`; this is what makes search
+// engines index the citation graph.
+const citationCreativeWorks = (() => {
+  if (!isLastPage || !hasCitedSources) return undefined;
+  const ordered = [...article.cited_sources!].sort((a, b) => a.position - b.position);
+  const works = ordered.flatMap((c) => {
+    const cached = sourcesCache.bySourceId[c.source_id];
+    if (!cached || cached.ok === false) return [];
+    return [{
+      '@type': 'CreativeWork' as const,
+      url: cached.url,
+      name: cached.title ?? cached.url,
+      description: c.snippet ?? cached.description ?? undefined,
+      publisher: cached.siteName
+        ? { '@type': 'Organization' as const, name: cached.siteName }
+        : undefined,
+    }];
+  });
+  return works.length > 0 ? works : undefined;
+})();
 
 // JSON-LD Article schema
 const articleSchema = {
@@ -147,6 +179,7 @@ const articleSchema = {
         url: new URL(baseUrl, Astro.site).toString(),
       }
     : undefined,
+  citation: citationCreativeWorks,
 };
 
 // Title: append " — Pagina N" on subsequent pages so SERP shows the page
@@ -373,8 +406,11 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
             </div>
           )}
 
-          {isLastPage && hasSources && (
-            <Sources items={article.sources!} />
+          {isLastPage && (hasSources || hasCitedSources) && (
+            <Sources
+              items={article.sources ?? []}
+              cited_sources={article.cited_sources}
+            />
           )}
 
           {isLastPage && authorData && (

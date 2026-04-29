@@ -28,6 +28,8 @@
 //
 // `site:` is filled from `site.config.yaml::identity.url`; the consumer
 // doesn't repeat it in astro.config.
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import type { AstroIntegration, AstroIntegrationLogger } from 'astro';
 import { loadSiteConfig, resolveSiteConfigPath } from './lib/load-site-config.js';
 import type { SiteConfig } from './site-config.js';
@@ -69,6 +71,9 @@ export interface AgenticMediaTemplateOptions {
 const VIRTUAL_ID = 'virtual:agentic-media/site-config';
 const RESOLVED_VIRTUAL_ID = '\0' + VIRTUAL_ID;
 
+const SOURCES_CACHE_VID = 'virtual:agentic-media/sources-cache';
+const SOURCES_CACHE_RVID = '\0' + SOURCES_CACHE_VID;
+
 function virtualSiteConfigPlugin(siteConfig: SiteConfig): import('vite').Plugin {
   return {
     name: 'agentic-media:site-config',
@@ -82,6 +87,44 @@ function virtualSiteConfigPlugin(siteConfig: SiteConfig): import('vite').Plugin 
         return `export default ${JSON.stringify(siteConfig)};`;
       }
       return null;
+    },
+  };
+}
+
+interface CachedSource {
+  url: string;
+  ok?: boolean;
+  source_id?: string;
+  [k: string]: unknown;
+}
+
+function virtualSourcesCachePlugin(rootUrl: URL): import('vite').Plugin {
+  return {
+    name: 'agentic-media:sources-cache',
+    enforce: 'pre',
+    resolveId(id) {
+      if (id === SOURCES_CACHE_VID) return SOURCES_CACHE_RVID;
+      return null;
+    },
+    load(id) {
+      if (id !== SOURCES_CACHE_RVID) return null;
+      const cachePath = fileURLToPath(new URL('src/data/sources-cache.json', rootUrl));
+      let raw: Record<string, CachedSource> = {};
+      try {
+        raw = JSON.parse(readFileSync(cachePath, 'utf8')) as Record<string, CachedSource>;
+      } catch {
+        // Missing or unreadable cache → empty. Sites without a
+        // prebuild step still build; Sources.astro falls back to
+        // rendering plain URLs.
+      }
+      const bySourceId: Record<string, CachedSource> = {};
+      for (const entry of Object.values(raw)) {
+        if (entry && typeof entry.source_id === 'string') {
+          bySourceId[entry.source_id] = entry;
+        }
+      }
+      const cache = { byUrlKey: raw, bySourceId };
+      return `export default ${JSON.stringify(cache)};`;
     },
   };
 }
@@ -103,7 +146,12 @@ export default function agenticMediaTemplate(
         // duplicate it. Skip if astro.config already set one (consumer
         // override wins).
         const updates: Parameters<typeof updateConfig>[0] = {
-          vite: { plugins: [virtualSiteConfigPlugin(siteConfig)] },
+          vite: {
+            plugins: [
+              virtualSiteConfigPlugin(siteConfig),
+              virtualSourcesCachePlugin(config.root),
+            ],
+          },
         };
         if (!config.site) {
           (updates as Record<string, unknown>).site = siteConfig.identity.url;

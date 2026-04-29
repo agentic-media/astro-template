@@ -5,10 +5,15 @@ export interface Props {
   description?: string | null;
   image?: string | null;
   siteName?: string | null;
+  /** Quoted snippet from the article body that referenced this source.
+   * Populated when the article carries a `cited_sources` subdoc with
+   * a `snippet` value (≤200 chars per the source-collection schema).
+   * Legacy cited sources and `fetch-sources.mjs`-only sites pass null. */
+  snippet?: string | null;
   fallback?: { title?: string; siteName?: string };
 }
 
-const { url, title, siteName, fallback = {} } = Astro.props;
+const { url, title, siteName, snippet, fallback = {} } = Astro.props;
 
 const displayTitle = title ?? fallback.title ?? url;
 const displaySite =
@@ -29,4 +34,7 @@ const displaySite =
     <span class="ist-source-card__open" aria-hidden="true">Apri →</span>
   </div>
   <h3 class="ist-source-card__title">{displayTitle}</h3>
+  {snippet && (
+    <blockquote class="ist-source-card__snippet" cite={url}>{snippet}</blockquote>
+  )}
 </a>

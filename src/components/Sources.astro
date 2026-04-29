@@ -1,38 +1,79 @@
 ---
 import SourceCard from './SourceCard.astro';
 import { createHash } from 'node:crypto';
+import sourcesCache from 'virtual:agentic-media/sources-cache';
+
+export interface CitedSource {
+  source_id: string;
+  snippet?: string | null;
+  position: number;
+}
 
 export interface Props {
+  /** Flat sources list (legacy). Always present. */
   items: { url: string; title?: string; siteName?: string }[];
+  /** Enriched citations from the lordship `articles` collection.
+   * When set, takes precedence: each subdoc's `source_id` resolves to
+   * a cached source via the virtual sources cache; the snippet (when
+   * captured) renders alongside the source card. Items without a
+   * matching `source_id` (e.g. cache miss) silently degrade to the
+   * `items` flow. */
+  cited_sources?: CitedSource[];
 }
 
-const { items } = Astro.props;
-
-// Load OG cache; tolerate it not existing yet
-let cache: Record<string, any> = {};
-try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mod = await import('../data/sources-cache.json');
-  cache = (mod as any).default ?? mod;
-} catch {
-  cache = {};
-}
+const { items, cited_sources } = Astro.props;
 
 function urlKey(url: string) {
   return createHash('sha1').update(url).digest('hex').slice(0, 16);
 }
 
-const enriched = items.map((item) => {
-  const cached = cache[urlKey(item.url)];
+type Enriched = {
+  url: string;
+  title: string | null;
+  description: string | null;
+  image: string | null;
+  siteName: string | null;
+  snippet: string | null;
+  fallback: { title?: string; siteName?: string };
+};
+
+function enrichFromItem(item: { url: string; title?: string; siteName?: string }, snippet: string | null = null): Enriched {
+  const cached = sourcesCache.byUrlKey[urlKey(item.url)];
   return {
     url: item.url,
-    title: cached?.ok ? cached.title : null,
-    description: cached?.ok ? cached.description : null,
-    image: cached?.ok ? cached.image : null,
-    siteName: cached?.ok ? cached.siteName : null,
+    title: cached?.ok ? cached.title ?? null : null,
+    description: cached?.ok ? cached.description ?? null : null,
+    image: cached?.ok ? cached.image ?? null : null,
+    siteName: cached?.ok ? cached.siteName ?? null : null,
+    snippet,
     fallback: { title: item.title, siteName: item.siteName },
   };
-});
+}
+
+let enriched: Enriched[];
+
+if (cited_sources && cited_sources.length > 0) {
+  // Resolve each subdoc against bySourceId. When a citation can't be
+  // resolved (cache miss — should be rare since prebuild runs against
+  // the same mongo seed wp-json-sync wrote), drop the citation rather
+  // than render a card with nothing on it. The flat `items` array is
+  // still the source of truth for "every URL the article references";
+  // we just lose the snippet for that one.
+  const ordered = [...cited_sources].sort((a, b) => a.position - b.position);
+  enriched = ordered.flatMap((c) => {
+    const cached = sourcesCache.bySourceId[c.source_id];
+    if (!cached) return [];
+    return [enrichFromItem({ url: cached.url }, c.snippet ?? null)];
+  });
+  // Append any flat-source URLs that DIDN'T appear in cited_sources
+  // (e.g. legacy article half-imported, or wp-json-sync skipped one).
+  const citedUrls = new Set(enriched.map((e) => e.url));
+  for (const item of items) {
+    if (!citedUrls.has(item.url)) enriched.push(enrichFromItem(item));
+  }
+} else {
+  enriched = items.map((item) => enrichFromItem(item));
+}
 ---
 
 <div class="ist-sources">
