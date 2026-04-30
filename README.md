@@ -84,6 +84,30 @@ Override per-site:
 <Header logoTop="LOREM" logoBottom="IPSUM" siteName="Lorem Ipsum" />
 ```
 
+### Theme — per-site CSS variable overrides
+
+Set `theme.cssVariables` in `site.config.yaml` to override any of the
+default tokens defined in `src/styles/global.css`. The integration
+emits an inline `<style is:global>:root { ... }</style>` in `<head>`
+after the default stylesheet, so the overrides win without shipping
+a per-site CSS file.
+
+```yaml
+# site.config.yaml
+theme:
+  cssVariables:
+    "--accent": "#fd190b"
+    "--brand-navy": "#0e2a5a"
+    "--content-width": "1095px"
+    "--radius-card": "8px"
+    "--font-body": "system-ui, -apple-system, sans-serif"
+```
+
+Keys must start with `--` (CSS custom property syntax). Values are
+emitted verbatim except for a defensive strip of `</style` sequences.
+Sites without the block render at the template defaults — no change
+to the existing build.
+
 ### Content collections
 
 `articles` schema:

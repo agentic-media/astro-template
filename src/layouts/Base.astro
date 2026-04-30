@@ -295,6 +295,14 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
       --ist-hero-height: ${siteConfig.media.hero.height}px;
       --ist-hero-aspect: ${siteConfig.media.hero.width} / ${siteConfig.media.hero.height};
     }`} />
+    {/* Per-site CSS variable overrides, layered after the template
+        defaults in src/styles/global.css. Empty for sites without a
+        site.config.yaml::theme.cssVariables block. */}
+    {Object.keys(siteConfig.theme.cssVariables).length > 0 && (
+      <style is:global set:html={`:root{${Object.entries(siteConfig.theme.cssVariables)
+        .map(([k, v]) => `${k}:${String(v).replace(/<\/style/gi, '')};`)
+        .join('')}}`} />
+    )}
   </head>
   <body class={bodyClass}>
     <slot />
