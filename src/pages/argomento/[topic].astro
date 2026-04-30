@@ -21,9 +21,19 @@ const topicMeta: Record<string, { label: string; description: string }> = Object
 // Re-importing the virtual module inside getStaticPaths so Astro's
 // isolated evaluation context still has access. Vite resolves this
 // at build time the same way as the top-level import.
+//
+// Only emit paths for topics that actually have ≥ 1 article — empty
+// topic pages would render a "no articles yet" placeholder that's
+// always indexable, hurts SEO, and confuses readers who arrive via
+// the topic dropdown.
 export async function getStaticPaths() {
   const { default: gspConfig } = await import('virtual:agentic-media/site-config');
-  return gspConfig.topics.map((t: { slug: string }) => ({ params: { topic: t.slug } }));
+  const { getCollection } = await import('astro:content');
+  const articles = await getCollection('articles');
+  const topicsWithArticles = new Set(articles.map((a) => a.data.topic).filter(Boolean));
+  return gspConfig.topics
+    .filter((t: { slug: string }) => topicsWithArticles.has(t.slug))
+    .map((t: { slug: string }) => ({ params: { topic: t.slug } }));
 }
 
 const { topic } = Astro.params as { topic: string };

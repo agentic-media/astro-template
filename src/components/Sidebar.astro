@@ -1,5 +1,6 @@
 ---
 import siteConfig from 'virtual:agentic-media/site-config';
+import { getNonEmptyTopics } from '../lib/topics';
 export interface RecentArticle {
   title: string;
   slug: string;
@@ -13,7 +14,10 @@ export interface Props {
   activeTopic?: string;
 }
 
-const { recentArticles = [], activeTopic, topics = siteConfig.topics } = Astro.props as {
+// Default topic list = topics with ≥ 1 article. Same rule as Header /
+// Footer / argomento index: empty topics never appear in nav surfaces.
+const defaultTopics = await getNonEmptyTopics();
+const { recentArticles = [], activeTopic, topics = defaultTopics } = Astro.props as {
   recentArticles?: RecentArticle[];
   activeTopic?: string;
   topics?: Array<{ slug: string; label: string }>;

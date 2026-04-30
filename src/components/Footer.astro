@@ -1,5 +1,6 @@
 ---
 import siteConfig from 'virtual:agentic-media/site-config';
+import { getNonEmptyTopics } from '../lib/topics';
 // Footer link list — fully driven by env. Default falls back to the
 // usual editorial-site links but the consumer can override via
 // PUBLIC_SITE_FOOTER_LINKS (JSON array of {href,label}).
@@ -20,13 +21,17 @@ interface Props {
   topicsTitle?: string;
   linksTitle?: string;
 }
+// Default topic list = topics with ≥ 1 article, so the footer never
+// advertises an empty category. Caller can still pass `topics` to
+// override (e.g. a curated subset on a special page).
+const defaultTopics = await getNonEmptyTopics();
 const {
   logoTop = siteConfig.logo.top,
   logoMiddle = siteConfig.logo.middle,
   logoBottom = siteConfig.logo.bottom,
   siteName = siteConfig.identity.name,
   siteDescription = siteConfig.identity.description,
-  topics = siteConfig.topics,
+  topics = defaultTopics,
   links = siteConfig.footer.links,
   disclaimer = siteConfig.footer.disclaimer,
   copyrightHolder = (siteConfig.footer.copyrightHolder ?? siteConfig.identity.name),

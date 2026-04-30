@@ -1,5 +1,6 @@
 ---
 import siteConfig from 'virtual:agentic-media/site-config';
+import { getNonEmptyTopics } from '../lib/topics';
 // Topic list drives the header nav and the Sidebar's "argomenti" panel.
 // Each consumer site overrides via PUBLIC_SITE_TOPICS — a JSON array of
 // `{slug,label}` (and optional `description`). Falls back to a small
@@ -17,12 +18,15 @@ interface Props {
   /** Label for the Argomenti dropdown trigger. */
   topicsLabel?: string;
 }
+// Default topic list = topics with ≥ 1 article. Empty topics never
+// land in the dropdown, so a click never lands on a placeholder page.
+const defaultTopics = await getNonEmptyTopics();
 const {
   logoTop = siteConfig.logo.top,
   logoMiddle = siteConfig.logo.middle,
   logoBottom = siteConfig.logo.bottom,
   siteName = siteConfig.identity.name,
-  topics = siteConfig.topics,
+  topics = defaultTopics,
   nav = siteConfig.header.nav,
   topicsLabel = siteConfig.header.topicsLabel,
 } = Astro.props as Props;
