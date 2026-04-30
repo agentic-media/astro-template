@@ -8,14 +8,16 @@ import { getCollection } from 'astro:content';
 // Topic list comes from PUBLIC_SITE_TOPICS (a JSON array of
 // {slug,label,description?,icon?}). Falls back to a generic
 // placeholder list — set the env var per site for real labels.
-const topics = siteConfig.topics;
-
-// Count articles per topic
+//
+// Filter to topics with ≥ 1 article so the index never advertises
+// empty categories. The full declared universe stays in YAML; this
+// is presentation-side gating only.
 const allArticles = await getCollection('articles');
 const countByTopic: Record<string, number> = {};
 allArticles.forEach((a) => {
-  countByTopic[a.data.topic] = (countByTopic[a.data.topic] ?? 0) + 1;
+  if (a.data.topic) countByTopic[a.data.topic] = (countByTopic[a.data.topic] ?? 0) + 1;
 });
+const topics = siteConfig.topics.filter((t) => (countByTopic[t.slug] ?? 0) > 0);
 const siteName = siteConfig.identity.name;
 ---
 
