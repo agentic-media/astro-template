@@ -113,6 +113,27 @@ export const SiteConfigSchema = z.object({
     middle: z.string().default(''),
     bottom: z.string().default('TEMPLATE'),
   }).default({}),
+  // Per-site CSS variable overrides. The integration emits these as
+  // `<style is:global>:root { --foo: bar; }</style>` in <head>, layered
+  // AFTER the template's default tokens in `src/styles/global.css` —
+  // so a consumer can repaint accent / surfaces / radii / etc. without
+  // shipping a stylesheet.
+  //
+  // Example (site.config.yaml):
+  //
+  //   theme:
+  //     cssVariables:
+  //       "--accent": "#fd190b"
+  //       "--brand-navy": "#0e2a5a"
+  //       "--content-width": "1095px"
+  //       "--radius-card": "8px"
+  //
+  // Sites that omit this block render at the template defaults. The
+  // value strings are emitted verbatim — checked-in YAML, no escaping
+  // beyond stripping `</style>` to defang an accidental sequence.
+  theme: z.object({
+    cssVariables: z.record(z.string().regex(/^--/), z.string()).default({}),
+  }).default({}),
   // Hero / image dimensions. ONE source of truth consumed by:
   //   • this template (CSS vars on :root via the integration)
   //   • the lordship's writer + agent-creative (in-run image generation)
