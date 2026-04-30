@@ -86,27 +86,34 @@ Override per-site:
 
 ### Theme — per-site CSS variable overrides
 
-Set `theme.cssVariables` in `site.config.yaml` to override any of the
-default tokens defined in `src/styles/global.css`. The integration
-emits an inline `<style is:global>:root { ... }</style>` in `<head>`
-after the default stylesheet, so the overrides win without shipping
-a per-site CSS file.
+The template's :root tokens have a single source of truth at
+`src/theme-defaults.ts` (`DEFAULT_THEME_TOKENS`). Per-site overrides
+go in `site.config.yaml::theme.cssVariables`. At build time the
+integration merges defaults ∪ overrides and emits ONE inline
+`<style is:global>:root{...}</style>` in `<head>`. `global.css`
+references the variables but never defines them, so there is no
+competing `:root` rule for Astro's auto-bundled stylesheet to win
+against — override semantics fall out by construction.
 
 ```yaml
 # site.config.yaml
 theme:
   cssVariables:
     "--accent": "#fd190b"
-    "--brand-navy": "#0e2a5a"
     "--content-width": "1095px"
     "--radius-card": "8px"
     "--font-body": "system-ui, -apple-system, sans-serif"
 ```
 
-Keys must start with `--` (CSS custom property syntax). Values are
-emitted verbatim except for a defensive strip of `</style` sequences.
-Sites without the block render at the template defaults — no change
-to the existing build.
+Keys must start with `--` (CSS custom property syntax) — the schema
+rejects anything else. Values are emitted verbatim except for a
+defensive strip of `</style` sequences. Sites without the block
+render at the template defaults; sites with a partial block get
+defaults for unspecified keys.
+
+Adding a new token: append it to `DEFAULT_THEME_TOKENS` and reference
+it via `var(--foo)` in components. Renaming: deprecate via an alias
+in defaults for one release, then remove.
 
 ### Content collections
 
