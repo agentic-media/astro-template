@@ -1,6 +1,20 @@
 ---
 import siteConfig from 'virtual:agentic-media/site-config';
+import { DEFAULT_THEME_TOKENS } from '../theme-defaults';
 import '../styles/global.css';
+
+// Merge the canonical defaults with the per-site overrides. This is
+// the ONLY place :root variables are defined for the site — global.css
+// no longer defines them, so there is no competing rule for the
+// auto-bundled <link> stylesheet to win against. Override semantics
+// fall out by construction; no !important needed.
+const themeTokens: Record<string, string> = {
+  ...DEFAULT_THEME_TOKENS,
+  ...siteConfig.theme.cssVariables,
+};
+const themeBlock = `:root{${Object.entries(themeTokens)
+  .map(([k, v]) => `${k}:${String(v).replace(/<\/style/gi, '')};`)
+  .join('')}}`;
 
 export interface Props {
   title: string;
@@ -295,14 +309,11 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
       --ist-hero-height: ${siteConfig.media.hero.height}px;
       --ist-hero-aspect: ${siteConfig.media.hero.width} / ${siteConfig.media.hero.height};
     }`} />
-    {/* Per-site CSS variable overrides, layered after the template
-        defaults in src/styles/global.css. Empty for sites without a
-        site.config.yaml::theme.cssVariables block. */}
-    {Object.keys(siteConfig.theme.cssVariables).length > 0 && (
-      <style is:global set:html={`:root{${Object.entries(siteConfig.theme.cssVariables)
-        .map(([k, v]) => `${k}:${String(v).replace(/<\/style/gi, '')};`)
-        .join('')}}`} />
-    )}
+    {/* The full :root token block — defaults from theme-defaults.ts
+        merged with site.config.yaml::theme.cssVariables. This is the
+        ONLY place :root variables are declared for the site; global.css
+        no longer defines them. */}
+    <style is:global set:html={themeBlock} />
   </head>
   <body class={bodyClass}>
     <slot />

@@ -52,43 +52,15 @@
    CSS Custom Properties
    ------------------------------------------------------------ */
 
-:root {
-  /* Brand colours */
-  --navy: #0c1a3a;
-  --magenta: #c9356b;
-  --accent: #c9356b;
-
-  /* Text */
-  --contrast: #222222;
-  --contrast-2: #575760;
-  --contrast-3: #888891;
-
-  /* Surfaces */
-  --base: #f7f8f9;
-  --base-2: #ffffff;
-  --base-3: #eef0f3;
-
-  /* Hairlines */
-  --hairline: #b2b2be;
-
-  /* Typography */
-  --font-heading: 'Blinker', system-ui, sans-serif;
-  --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    Oxygen, Ubuntu, sans-serif;
-
-  /* Spacing */
-  --content-width: 1000px;
-  --col-gap: 40px;
-  /* Article body column on desktop. Used by .ist-single__* sections
-     so the cover, body, page nav, sources, author, post-nav all
-     share the same width and stay visually aligned. */
-  --article-width: 820px;
-
-  /* Radius */
-  --radius-card: 10px;
-  --radius-cta: 8px;
-  --radius-tag: 2rem;
-}
+/* :root token defaults are NOT defined here. They live in
+   src/theme-defaults.ts (the single source of truth) and are emitted
+   as `<style is:global>:root{...}</style>` by Base.astro after merging
+   with site.config.yaml::theme.cssVariables. Defining them here would
+   re-introduce the cascade fight: this stylesheet is auto-imported and
+   bundled by Astro's build pipeline, which lands the resulting <link>
+   in <head> AFTER any inline <style is:global>, silently shadowing
+   per-site overrides. Keep this file for rules that USE the variables
+   (`color: var(--accent)`, etc.) — never for ones that define them. */
 
 /* ------------------------------------------------------------
    Base Reset
