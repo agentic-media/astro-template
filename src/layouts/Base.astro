@@ -297,10 +297,19 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     }`} />
     {/* Per-site CSS variable overrides, layered after the template
         defaults in src/styles/global.css. Empty for sites without a
-        site.config.yaml::theme.cssVariables block. */}
+        site.config.yaml::theme.cssVariables block.
+
+        Each declaration is emitted with `!important` because Astro's
+        bundler injects the auto-import of `global.css` as a `<link>`
+        in head AFTER any inline `<style>` blocks defined in the layout
+        — so equal-specificity cascade rules would let the bundled
+        stylesheet's hard-coded :root defaults win over this override.
+        `!important` on a custom-property declaration sets the variable
+        regardless of source order. (Caller's YAML controls the values,
+        no XSS surface.) */}
     {Object.keys(siteConfig.theme.cssVariables).length > 0 && (
       <style is:global set:html={`:root{${Object.entries(siteConfig.theme.cssVariables)
-        .map(([k, v]) => `${k}:${String(v).replace(/<\/style/gi, '')};`)
+        .map(([k, v]) => `${k}:${String(v).replace(/<\/style/gi, '')} !important;`)
         .join('')}}`} />
     )}
   </head>
