@@ -81,8 +81,8 @@ robots:
 # to today's behaviour. Opt-in is editing this block (or a single key).
 media:
   hero:
-    width:       1600              # int px
-    height:      900               # int px (aspect = width/height)
+    width:       1536              # int px (3:2 — gpt-image-2 native landscape)
+    height:      1024              # int px (aspect = width/height)
     quality:     78                # 1..100
     formats:     [webp]
     derivatives: []                # e.g. [480, 960] for build-time srcset
