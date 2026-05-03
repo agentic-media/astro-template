@@ -153,6 +153,22 @@ export const SiteConfigSchema = z.object({
       derivatives: z.array(z.number().int().positive()).default([]),
     }).default({}),
   }).default({}),
+  // Opt-in feature flags. Each flag defaults to false so existing
+  // consumer sites that omit this block are unaffected.
+  //
+  // Example (site.config.yaml):
+  //   features:
+  //     filterChips: true
+  //     stickySidebar: true
+  //     dualToneLogo: true
+  features: z.object({
+    /** Render a FilterChips bar on index/argomento pages. */
+    filterChips: z.boolean().default(false),
+    /** Enable sticky sidebar at >= 768 px viewport width. */
+    stickySidebar: z.boolean().default(false),
+    /** Apply dual-tone navy/gold CSS vars to the CSS wordmark logo. */
+    dualToneLogo: z.boolean().default(false),
+  }).default({}),
 });
 
 export type SiteConfig = z.infer<typeof SiteConfigSchema>;
