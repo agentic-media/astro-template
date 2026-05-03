@@ -209,6 +209,25 @@ p {
   text-transform: uppercase;
 }
 
+/* Dual-tone logo variant — opt-in via features.dualToneLogo: true.
+   Wordmark (top) renders in --brand-navy, mark/tagline (bottom/salute)
+   in --brand-gold. Designed for sites where the header has a light
+   background (e.g. base-3 / white). The consumer site sets
+   --brand-navy and --brand-gold in site.config.yaml::theme.cssVariables;
+   if absent, falls back to the Pensione Roma brand defaults. */
+.ist-logo--dual-tone .ist-logo__top {
+  color: var(--brand-navy, #0e2a5a);
+}
+
+.ist-logo--dual-tone .ist-logo__salute {
+  color: var(--brand-gold, #c9a44a);
+}
+
+.ist-logo--dual-tone .ist-logo__bottom {
+  color: var(--brand-navy, #0e2a5a);
+  opacity: 0.7;
+}
+
 /* ------------------------------------------------------------
    Navigation
    ------------------------------------------------------------ */
