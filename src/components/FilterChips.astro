@@ -1,0 +1,163 @@
+---
+/**
+ * FilterChips — opt-in topic/tag filter bar for index pages.
+ *
+ * Opt-in: set `features.filterChips: true` in site.config.yaml.
+ * When the feature flag is off, the component renders nothing, so
+ * existing sites that don't configure it are unaffected.
+ *
+ * Usage:
+ *   <FilterChips
+ *     items={[{ label: 'Roma', href: '/argomento/roma/', slug: 'roma' }, …]}
+ *     activeSlug="roma"
+ *     allLabel="Tutti"
+ *     allHref="/argomento/"
+ *   />
+ *
+ * Accessibility:
+ * - The list is a <nav> with role="list" so screen readers announce it.
+ * - The active chip carries aria-current="page".
+ * - Focus ring uses the site accent token.
+ * - Min tap target: 44px height via min-height.
+ */
+
+import siteConfig from 'virtual:agentic-media/site-config';
+
+export interface ChipItem {
+  label: string;
+  href: string;
+  slug: string;
+}
+
+export interface Props {
+  /** Array of filter items to render. */
+  items: ChipItem[];
+  /** Slug of the currently active filter chip. Falsy = "all" is active. */
+  activeSlug?: string;
+  /** Label for the "show all" chip. Defaults to "Tutti". */
+  allLabel?: string;
+  /** Href for the "show all" chip. */
+  allHref?: string;
+  /** Additional CSS class on the wrapper. */
+  class?: string;
+}
+
+// Feature flag guard. When the site has not opted in, render nothing.
+// Safe to place in a layout without an outer conditional.
+const enabled = (siteConfig as any).features?.filterChips === true;
+
+const {
+  items,
+  activeSlug,
+  allLabel = 'Tutti',
+  allHref = '/argomento/',
+  class: extraClass = '',
+} = Astro.props as Props;
+
+const allActive = !activeSlug;
+---
+
+{enabled && (
+  <nav
+    class:list={['ist-filter-chips', extraClass]}
+    aria-label="Filtra per argomento"
+  >
+    <ul class="ist-filter-chips__list" role="list">
+      <li class="ist-filter-chips__item">
+        <a
+          href={allHref}
+          class:list={['ist-filter-chip', { 'ist-filter-chip--active': allActive }]}
+          aria-current={allActive ? 'page' : undefined}
+        >
+          {allLabel}
+        </a>
+      </li>
+      {items.map((item) => {
+        const isActive = item.slug === activeSlug;
+        return (
+          <li class="ist-filter-chips__item">
+            <a
+              href={item.href}
+              class:list={['ist-filter-chip', { 'ist-filter-chip--active': isActive }]}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+)}
+
+<style>
+  .ist-filter-chips {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-block: var(--sp-30, 0.67rem);
+  }
+
+  .ist-filter-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ist-filter-chips__list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: var(--sp-20, 0.44rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 768px) {
+    .ist-filter-chips__list {
+      flex-wrap: wrap;
+    }
+  }
+
+  .ist-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    min-height: 44px;
+    padding-block: 0.3em;
+    padding-inline: var(--sp-50, 1.5rem);
+    border-radius: var(--r-pill, var(--radius-tag, 2rem));
+    border: 2px solid var(--accent, #c9356b);
+    color: var(--accent, #c9356b);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition:
+      background 0.15s ease,
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+
+  .ist-filter-chip:hover {
+    background: var(--accent, #c9356b);
+    color: #fff;
+  }
+
+  .ist-filter-chip--active {
+    background: var(--accent, #c9356b);
+    color: #fff;
+    border-color: var(--accent, #c9356b);
+  }
+
+  .ist-filter-chip:focus-visible {
+    outline: 2px solid var(--accent, #c9356b);
+    outline-offset: 3px;
+    border-radius: var(--r-sm, 2px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ist-filter-chip {
+      transition: none;
+    }
+  }
+</style>
