@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import AuthorBox from '../components/AuthorBox.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import Sidebar from '../components/Sidebar.astro';
+import StickySidebar from '../components/StickySidebar.astro';
 import Sources from '../components/Sources.astro';
 import TagPill from '../components/TagPill.astro';
 import sourcesCache from 'virtual:agentic-media/sources-cache';
@@ -446,9 +447,9 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
           )}
         </article>
 
-        <aside class="ist-article-cols__sidebar" aria-label="Barra laterale">
+        <StickySidebar class="ist-article-cols__sidebar" aria-label="Barra laterale">
           <Sidebar recentArticles={recentArticles} activeTopic={article.topic} />
-        </aside>
+        </StickySidebar>
       </div>
     </div>
   </main>
