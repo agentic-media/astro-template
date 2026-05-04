@@ -6,6 +6,11 @@ import { getNonEmptyTopics } from '../lib/topics';
 // `{slug,label}` (and optional `description`). Falls back to a small
 // generic placeholder so a fresh site builds without configuring this.
 const currentPath = Astro.url.pathname;
+// Feature: dual-tone logo — navy wordmark + gold mark, for light-bg headers.
+// Opt-in: features.dualToneLogo: true in site.config.yaml.
+// The consumer site must also set --brand-navy and --brand-gold in
+// theme.cssVariables (or accept the template defaults).
+const dualTone = (siteConfig as any).features?.dualToneLogo === true;
 interface Props {
   logoTop?: string;
   logoMiddle?: string;
@@ -37,7 +42,7 @@ const {
   <div class="ist-container">
     <div class="ist-header__inner">
       <!-- CSS Wordmark Logo -->
-      <a href="/" class="ist-logo" aria-label={`${siteName} - Homepage`}>
+      <a href="/" class:list={["ist-logo", { "ist-logo--dual-tone": dualTone }]} aria-label={`${siteName} - Homepage`}>
         <span class="ist-logo__top">{logoTop}</span>
         {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
         <span class="ist-logo__bottom">{logoBottom}</span>
