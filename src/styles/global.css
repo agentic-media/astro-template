@@ -384,7 +384,12 @@ p {
   background: var(--base-2);
   border-radius: var(--radius-card);
   overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* border-top is transparent at rest so no layout shift on hover. */
+  border-top: 2px solid transparent;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -392,7 +397,16 @@ p {
 
 .ist-article-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card-hover, 0 4px 16px rgba(0, 0, 0, 0.08));
+  border-top-color: var(--accent, var(--magenta));
+}
+
+/* Focus-within: visible keyboard navigation cue when any descendant
+   link is focused. Mirrors hover state so keyboard and mouse are
+   visually equivalent. */
+.ist-article-card:focus-within {
+  border-top-color: var(--accent, var(--magenta));
+  box-shadow: var(--shadow-card-hover, 0 4px 16px rgba(0, 0, 0, 0.08));
 }
 
 .ist-article-card__img-wrap {
@@ -529,12 +543,18 @@ p {
 .ist-article-card__read-more:hover {
   background: var(--navy);
   color: #fff;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(12, 26, 58, 0.18);
+  /* No translateY here — the parent card already lifts on hover.
+     The shadow shift gives enough depth cue. */
+  box-shadow: 0 4px 12px rgba(12, 26, 58, 0.22);
 }
 
 .ist-article-card__read-more:hover::after {
   transform: translateX(3px);
+}
+
+.ist-article-card__read-more:focus-visible {
+  outline: 2px solid var(--accent, var(--magenta));
+  outline-offset: 3px;
 }
 
 /* Card Grid */
@@ -706,14 +726,16 @@ p {
 }
 
 .ist-single__content blockquote {
-  border-left: 4px solid var(--magenta);
-  padding: 16px 20px;
-  margin: 2rem 0;
+  border-left: 4px solid var(--accent, var(--magenta));
+  padding: 1rem 1.25rem;
+  /* Generous vertical spacing so the quote breathes in a dense article. */
+  margin: 2.25rem 0;
   background: var(--base);
   border-radius: 0 8px 8px 0;
   color: var(--contrast-2);
   font-style: italic;
   font-size: 1.05rem;
+  line-height: 1.65;
 }
 
 .ist-single__content blockquote p:last-child {
@@ -852,7 +874,8 @@ p {
 .ist-author-box__bio {
   font-size: 0.9rem;
   color: var(--contrast-2);
-  line-height: 1.6;
+  /* Slightly more generous than body line-height for short reading bursts. */
+  line-height: 1.65;
   margin: 0;
 }
 
@@ -1924,13 +1947,14 @@ p {
 }
 
 .ist-single__body blockquote {
-  border-left: 4px solid var(--magenta);
-  padding: 14px 18px;
-  margin: 1.6rem 0;
+  border-left: 4px solid var(--accent, var(--magenta));
+  padding: 0.875rem 1.125rem;
+  margin: 1.75rem 0;
   background: var(--base);
   border-radius: 0 8px 8px 0;
   color: var(--contrast-2);
   font-style: italic;
+  line-height: 1.65;
 }
 
 .ist-single__body blockquote p:last-child {
@@ -2517,6 +2541,11 @@ p {
   .ist-consent__cat input[type="checkbox"],
   .ist-consent__cat input[type="checkbox"]::before,
   .ist-consent__btn { transition: none; }
+  /* Card and image transitions suppressed for reduced-motion users. */
+  .ist-article-card,
+  .ist-article-card__img,
+  .ist-article-card__read-more,
+  .ist-article-card__read-more::after { transition: none; }
 }
 
 /* ------------------------------------------------------------
