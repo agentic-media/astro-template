@@ -1,0 +1,93 @@
+---
+/**
+ * StickySidebar — opt-in sticky wrapper for the sidebar column.
+ *
+ * Opt-in: set `features.stickySidebar: true` in site.config.yaml.
+ * When disabled, renders a plain <aside> with no position change —
+ * existing behaviour is preserved exactly.
+ *
+ * Usage (replaces bare <aside> at each page call site):
+ *   <StickySidebar aria-label="Barra laterale">
+ *     <Sidebar recentArticles={recentArticles} />
+ *   </StickySidebar>
+ *
+ * How sticky works:
+ * - At <768px the aside is in normal flow (single column layout).
+ * - At >=768px: `position: sticky; top: var(--sticky-top, 24px)`.
+ *   The default offset (24px) keeps a comfortable gap below a fixed
+ *   header. Override per site via:
+ *     theme:
+ *       cssVariables:
+ *         "--sticky-top": "80px"
+ *
+ * The sticky container clips at its grid-row height, so if the main
+ * content is shorter than the sidebar, the sidebar stops at its
+ * natural scroll position — no awkward overflow.
+ *
+ * Accessibility: the element is still a semantic <aside> with the
+ * passed aria-label, so screen readers experience no change.
+ */
+
+import siteConfig from 'virtual:agentic-media/site-config';
+
+export interface Props {
+  /** Accessible label for the aside landmark. */
+  'aria-label'?: string;
+  /** Extra CSS class on the aside element. */
+  class?: string;
+}
+
+const sticky = (siteConfig as any).features?.stickySidebar === true;
+const ariaLabel = Astro.props['aria-label'];
+const extraClass = Astro.props.class ?? '';
+---
+
+<aside
+  class:list={['ist-sidebar-wrap', { 'ist-sidebar-wrap--sticky': sticky }, extraClass]}
+  aria-label={ariaLabel}
+>
+  <slot />
+</aside>
+
+<style>
+  .ist-sidebar-wrap--sticky {
+    /* Mobile: normal flow, no sticky (single-column layout anyway) */
+    position: static;
+  }
+
+  @media (min-width: 768px) {
+    .ist-sidebar-wrap--sticky {
+      position: sticky;
+      /* Offset: leave room below fixed headers. Override via
+         --sticky-top in site.config.yaml::theme.cssVariables. */
+      top: var(--sticky-top, 24px);
+      /* Align-self: start prevents the grid cell from stretching to
+         match the main column height, which would break sticky. */
+      align-self: start;
+      /* max-height + overflow-y: auto so a very tall sidebar doesn't
+         overflow the viewport on short pages. */
+      max-height: calc(100vh - var(--sticky-top, 24px) - 16px);
+      overflow-y: auto;
+      /* Hide scrollbar on webkit while keeping scrollability */
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline, #b2b2be) transparent;
+    }
+
+    .ist-sidebar-wrap--sticky::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .ist-sidebar-wrap--sticky::-webkit-scrollbar-thumb {
+      background: var(--hairline, #b2b2be);
+      border-radius: 2px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ist-sidebar-wrap--sticky {
+      /* Sticky itself isn't motion, but guard any future scroll
+         animations that might be added. */
+      scroll-behavior: auto;
+    }
+  }
+</style>

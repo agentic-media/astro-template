@@ -5,6 +5,7 @@ import Header from '../../components/Header.astro';
 import Footer from '../../components/Footer.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import Sidebar from '../../components/Sidebar.astro';
+import StickySidebar from '../../components/StickySidebar.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import Pagination from '../../components/Pagination.astro';
 import { getCollection } from 'astro:content';
@@ -173,9 +174,9 @@ const personSchema = {
         </div>
 
         <!-- Sidebar -->
-        <aside aria-label="Barra laterale">
+        <StickySidebar aria-label="Barra laterale">
           <Sidebar recentArticles={recentArticles} />
-        </aside>
+        </StickySidebar>
       </div>
     </div>
   </main>
