@@ -34,12 +34,18 @@ export const DEFAULT_THEME_TOKENS: Record<string, string> = {
   '--font-body':       "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif",
 
   // Spacing.
-  '--content-width':   '1000px',
+  '--content-width':   '1200px',
   '--col-gap':         '40px',
   // Article body column on desktop. Used by .ist-single__* sections
   // so the cover, body, page nav, sources, author, post-nav all
-  // share the same width and stay visually aligned.
-  '--article-width':   '820px',
+  // share the same width and stay visually aligned. 920px at the
+  // larger 18px desktop body font ≈ 70 characters per line — the
+  // upper edge of the 60–75ch readability sweet spot. Bumped from
+  // 820px in the 3venezie tuning pass: editorial review found the
+  // narrower column wasted desktop horizontal space without a
+  // typographic benefit (820px at 16.8px font ≈ 84ch, already past
+  // the readable line-length range).
+  '--article-width':   '920px',
 
   // Radius.
   '--radius-card':     '10px',

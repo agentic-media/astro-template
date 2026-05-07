@@ -39,6 +39,15 @@ export const SiteConfigSchema = z.object({
     emptyBody: z.string().default(''),
   }).default({}),
   topics: z.array(TopicSchema).default([]),
+  /** Optional per-slug display name overrides for topic hubs. When a
+   *  slug is absent from this map the template falls back to Title-Case
+   *  derivation (hyphens → spaces, first letter of each word capitalised).
+   *  Example (site.config.yaml):
+   *    topicDisplayNames:
+   *      benessere-mentale: "Benessere Mentale"
+   *      bonus-e-agevolazioni: "Bonus e Agevolazioni"
+   */
+  topicDisplayNames: z.record(z.string(), z.string()).default({}),
   topicsPage: z.object({
     title: z.string().default('Argomenti'),
     lede: z.string().default(''),

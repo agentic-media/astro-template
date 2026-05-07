@@ -125,28 +125,39 @@ const prevPageHref = !isFirstPage ? new URL(pageUrl(currentPage - 1), Astro.site
 const nextPageHref = !isLastPage ? new URL(pageUrl(currentPage + 1), Astro.site).toString() : null;
 
 // JSON-LD citation block — emitted on the last page of paginated
-// articles (where the sources block also renders) when cited_sources
-// is populated. Each citation references the original CreativeWork by
-// URL with the captured snippet as `description`. Schema.org's Article
-// type accepts `citation: CreativeWork[]`; this is what makes search
-// engines index the citation graph.
+// articles (where the sources block also renders). Primary path uses
+// enriched cited_sources with snippets; fallback uses the flat sources
+// array so articles that only have a sources: list still emit
+// Article.citation for the SEO citation graph.
 const citationCreativeWorks = (() => {
-  if (!isLastPage || !hasCitedSources) return undefined;
-  const ordered = [...article.cited_sources!].sort((a, b) => a.position - b.position);
-  const works = ordered.flatMap((c) => {
-    const cached = sourcesCache.bySourceId[c.source_id];
-    if (!cached || cached.ok === false) return [];
-    return [{
+  if (!isLastPage) return undefined;
+  if (hasCitedSources) {
+    const ordered = [...article.cited_sources!].sort((a, b) => a.position - b.position);
+    const works = ordered.flatMap((c) => {
+      const cached = sourcesCache.bySourceId[c.source_id];
+      if (!cached || cached.ok === false) return [];
+      return [{
+        '@type': 'CreativeWork' as const,
+        url: cached.url,
+        name: cached.title ?? cached.url,
+        description: c.snippet ?? cached.description ?? undefined,
+        publisher: cached.siteName
+          ? { '@type': 'Organization' as const, name: cached.siteName }
+          : undefined,
+      }];
+    });
+    return works.length > 0 ? works : undefined;
+  }
+  // Fallback: emit from flat sources array when cited_sources is absent.
+  if (hasSources) {
+    const works = article.sources!.map((item) => ({
       '@type': 'CreativeWork' as const,
-      url: cached.url,
-      name: cached.title ?? cached.url,
-      description: c.snippet ?? cached.description ?? undefined,
-      publisher: cached.siteName
-        ? { '@type': 'Organization' as const, name: cached.siteName }
-        : undefined,
-    }];
-  });
-  return works.length > 0 ? works : undefined;
+      url: item.url,
+      name: item.title ?? item.url,
+    }));
+    return works.length > 0 ? works : undefined;
+  }
+  return undefined;
 })();
 
 const hasFaqs = (article.faqs?.length ?? 0) > 0;
@@ -165,6 +176,69 @@ const faqSchema = (isLastPage && hasFaqs)
       })),
     }
   : null;
+
+// Derive human-readable topic display name.
+// Prefer the per-site `topicDisplayNames` override map (set in
+// site.config.yaml), then fall back to the existing `topicLabels` map
+// built from `topics[].label`, and finally auto-derive from the slug
+// (Title-Case with hyphens replaced by spaces).
+function titleCase(slug: string): string {
+  return slug
+    .split('-')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+}
+const topicDisplayName =
+  siteConfig.topicDisplayNames?.[article.topic] ??
+  topicLabel ??
+  titleCase(article.topic);
+
+const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+// JSON-LD BreadcrumbList — emitted on every article page (all pages of
+// paginated articles share the same breadcrumb structure).
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    {
+      '@type': 'ListItem',
+      position: 1,
+      name: 'Home',
+      item: `${siteOrigin}/`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: topicDisplayName,
+      item: `${siteOrigin}/argomento/${article.topic}/`,
+    },
+    {
+      '@type': 'ListItem',
+      position: 3,
+      name: article.title,
+      item: canonical,
+    },
+  ],
+};
+
+// JSON-LD standalone WebPage entity — emitted on every article page.
+// The `@id` matches the `mainEntityOfPage['@id']` inside the Article
+// schema so search engines can resolve the cross-reference. `isPartOf`
+// points to the site-level WebSite entity emitted on the homepage.
+const webPageSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  '@id': canonical,
+  url: canonical,
+  name: article.ogTitle ?? article.title,
+  description: article.ogDescription ?? article.description,
+  inLanguage: 'it-IT',
+  isPartOf: {
+    '@type': 'WebSite',
+    '@id': `${siteOrigin}/#website`,
+  },
+};
 
 // JSON-LD Article schema
 const articleSchema = {
@@ -241,6 +315,8 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
   nextPageHref={nextPageHref}
 >
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
+  <script type="application/ld+json" set:html={JSON.stringify(webPageSchema)} />
   {faqSchema && (
     <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
   )}
