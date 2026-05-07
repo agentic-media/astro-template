@@ -76,11 +76,12 @@ if (cited_sources && cited_sources.length > 0) {
 }
 ---
 
-<div class="ist-sources">
-  <header class="ist-sources__header">
-    <p class="ist-sources__label">Fonti</p>
-    <h2 class="ist-sources__title">Le ricerche e gli articoli citati</h2>
-  </header>
+<details class="ist-sources ist-sources--collapsed">
+  <summary class="ist-sources__toggle">
+    Fonti consultate per questo articolo
+  </summary>
 
-  {enriched.map((item) => <SourceCard {...item} />)}
-</div>
+  <div class="ist-sources__list">
+    {enriched.map((item) => <SourceCard {...item} />)}
+  </div>
+</details>
