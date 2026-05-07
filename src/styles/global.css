@@ -1903,8 +1903,8 @@ p {
     padding: 32px 56px 36px;
     max-width: var(--article-width);
     margin: 0 auto;
-    font-size: 1.05rem;
-    line-height: 1.75;
+    font-size: 1.125rem;
+    line-height: 1.7;
   }
 }
 
