@@ -91,6 +91,12 @@ const cfg = {
 };
 
 const canonical = canonicalUrl ?? Astro.url.href;
+// Ensure og:image is an absolute URL — relative paths break OpenGraph
+// parsers and Google's structured-data validator. Resolve against Astro.site
+// when the value starts with '/' (no-op if already absolute).
+const ogImageAbsolute = ogImage.startsWith('http')
+  ? ogImage
+  : new URL(ogImage, Astro.site ?? Astro.url).toString();
 // Append " — siteName" UNLESS the caller already included it (e.g.
 // passed `title={`Contatti — ${siteName}`}`). Avoids "Foo — Pesce — Pesce".
 const fullTitle = (title === cfg.siteName || title.endsWith(`— ${cfg.siteName}`))
@@ -187,7 +193,7 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     <!-- Open Graph -->
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
-    <meta property="og:image" content={ogImage} />
+    <meta property="og:image" content={ogImageAbsolute} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
     <meta property="og:locale" content={cfg.ogLocale} />
@@ -200,7 +206,7 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image" content={ogImageAbsolute} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

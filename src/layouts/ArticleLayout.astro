@@ -246,7 +246,7 @@ const articleSchema = {
   '@type': 'Article',
   headline: article.title,
   description: article.description,
-  image: article.heroImage ?? null,
+  image: article.heroImage ? new URL(article.heroImage, Astro.site).toString() : null,
   datePublished: article.publishedDate,
   dateModified: article.modifiedDate ?? article.publishedDate,
   author: {
