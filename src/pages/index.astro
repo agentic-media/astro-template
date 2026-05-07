@@ -40,18 +40,30 @@ const heroLede     = (siteConfig.hero.lede ?? siteConfig.identity.description);
 const emptyTitle   = siteConfig.hero.emptyTitle;
 const emptyBody    = siteConfig.hero.emptyBody;
 
+const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com';
+
 const websiteSchema = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
+  '@id': `${siteOrigin}/#website`,
   name: siteName,
-  url: (Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'),
+  url: siteOrigin,
   description: siteDesc,
   inLanguage: (siteConfig.identity.ogLocale).replace('_', '-'),
+  publisher: {
+    '@type': 'Organization',
+    name: siteName,
+    url: siteOrigin,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${siteOrigin}/logo.png`,
+    },
+  },
   potentialAction: {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: `${Astro.site?.toString().replace(/\/$/, '') ?? 'https://example.com'}/cerca/?q={search_term_string}`,
+      urlTemplate: `${siteOrigin}/cerca/?q={search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },

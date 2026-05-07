@@ -74,23 +74,51 @@ const breadcrumbItems = [
   { label: meta.label, href: '#' },
 ];
 
+const siteOrigin = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const hubUrl = `${siteOrigin}/argomento/${topic}/`;
+
 // JSON-LD CollectionPage schema
 const collectionSchema = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
   name: `${meta.label} — ${siteConfig.identity.name}`,
   description: meta.description,
-  url: `${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`,
+  url: hubUrl,
   inLanguage: 'it-IT',
 };
+
+// JSON-LD ItemList — top 10 most recent articles in this topic.
+// Only emitted on page 1 of the topic hub (this file handles page 1).
+const itemListSchema = topicArticles.length > 0
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: meta.label,
+      url: hubUrl,
+      itemListElement: topicArticles.slice(0, 10).map((article, idx) => ({
+        '@type': 'ListItem',
+        position: idx + 1,
+        item: {
+          '@type': 'Article',
+          url: `${siteOrigin}/${article.data.topic}/${article.id}/`,
+          name: article.data.title,
+          datePublished: article.data.publishedDate,
+          image: article.data.heroImage ?? undefined,
+        },
+      })),
+    }
+  : null;
 ---
 
 <Base
   title={`${meta.label} — ${siteConfig.identity.name}`}
   description={meta.description}
-  canonicalUrl={`${Astro.site?.toString().replace(/\/$/,'') ?? ''}/argomento/${topic}/`}
+  canonicalUrl={hubUrl}
 >
   <script type="application/ld+json" set:html={JSON.stringify(collectionSchema)} />
+  {itemListSchema && (
+    <script type="application/ld+json" set:html={JSON.stringify(itemListSchema)} />
+  )}
 
   <Header />
 
