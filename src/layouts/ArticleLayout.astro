@@ -125,28 +125,39 @@ const prevPageHref = !isFirstPage ? new URL(pageUrl(currentPage - 1), Astro.site
 const nextPageHref = !isLastPage ? new URL(pageUrl(currentPage + 1), Astro.site).toString() : null;
 
 // JSON-LD citation block — emitted on the last page of paginated
-// articles (where the sources block also renders) when cited_sources
-// is populated. Each citation references the original CreativeWork by
-// URL with the captured snippet as `description`. Schema.org's Article
-// type accepts `citation: CreativeWork[]`; this is what makes search
-// engines index the citation graph.
+// articles (where the sources block also renders). Primary path uses
+// enriched cited_sources with snippets; fallback uses the flat sources
+// array so articles that only have a sources: list still emit
+// Article.citation for the SEO citation graph.
 const citationCreativeWorks = (() => {
-  if (!isLastPage || !hasCitedSources) return undefined;
-  const ordered = [...article.cited_sources!].sort((a, b) => a.position - b.position);
-  const works = ordered.flatMap((c) => {
-    const cached = sourcesCache.bySourceId[c.source_id];
-    if (!cached || cached.ok === false) return [];
-    return [{
+  if (!isLastPage) return undefined;
+  if (hasCitedSources) {
+    const ordered = [...article.cited_sources!].sort((a, b) => a.position - b.position);
+    const works = ordered.flatMap((c) => {
+      const cached = sourcesCache.bySourceId[c.source_id];
+      if (!cached || cached.ok === false) return [];
+      return [{
+        '@type': 'CreativeWork' as const,
+        url: cached.url,
+        name: cached.title ?? cached.url,
+        description: c.snippet ?? cached.description ?? undefined,
+        publisher: cached.siteName
+          ? { '@type': 'Organization' as const, name: cached.siteName }
+          : undefined,
+      }];
+    });
+    return works.length > 0 ? works : undefined;
+  }
+  // Fallback: emit from flat sources array when cited_sources is absent.
+  if (hasSources) {
+    const works = article.sources!.map((item) => ({
       '@type': 'CreativeWork' as const,
-      url: cached.url,
-      name: cached.title ?? cached.url,
-      description: c.snippet ?? cached.description ?? undefined,
-      publisher: cached.siteName
-        ? { '@type': 'Organization' as const, name: cached.siteName }
-        : undefined,
-    }];
-  });
-  return works.length > 0 ? works : undefined;
+      url: item.url,
+      name: item.title ?? item.url,
+    }));
+    return works.length > 0 ? works : undefined;
+  }
+  return undefined;
 })();
 
 const hasFaqs = (article.faqs?.length ?? 0) > 0;
