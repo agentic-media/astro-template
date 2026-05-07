@@ -40,6 +40,20 @@ const articles = defineCollection({
         })
       )
       .optional(),
+    // FAQ items rendered into the body and emitted as FAQPage JSON-LD
+    // by ArticleLayout when the array is non-empty. Each Q&A becomes a
+    // schema.org Question with an acceptedAnswer Answer; the layout
+    // also renders the items visually so the schema mirrors what the
+    // reader sees. Optional — articles whose voice does not naturally
+    // accommodate Q&A leave this absent.
+    faqs: z
+      .array(
+        z.object({
+          q: z.string().min(1),
+          a: z.string().min(1),
+        })
+      )
+      .optional(),
   }),
 });
 

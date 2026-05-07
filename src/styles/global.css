@@ -2170,6 +2170,49 @@ p {
   }
 }
 
+/* ── FAQs (renders before Sources when frontmatter `faqs:` present) ── */
+
+.ist-single .ist-faqs {
+  margin: 0 22px 28px;
+  padding-top: 24px;
+  border-top: 1px solid var(--hairline);
+}
+
+@media (min-width: 768px) {
+  .ist-single .ist-faqs {
+    margin: 0 auto 32px;
+    max-width: var(--article-width);
+    padding: 24px 56px 0;
+  }
+}
+
+.ist-faqs__heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.ist-faqs__list {
+  margin: 0;
+  display: grid;
+  gap: 18px;
+}
+
+.ist-faqs__item {
+  display: grid;
+  gap: 6px;
+}
+
+.ist-faqs__question {
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.ist-faqs__answer {
+  margin: 0;
+  line-height: 1.65;
+}
+
 /* ── Sources, AuthorBox, post-nav inside .ist-single ───────── */
 
 .ist-single .ist-sources {

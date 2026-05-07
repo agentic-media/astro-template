@@ -149,6 +149,23 @@ const citationCreativeWorks = (() => {
   return works.length > 0 ? works : undefined;
 })();
 
+const hasFaqs = (article.faqs?.length ?? 0) > 0;
+
+// JSON-LD FAQPage schema — emitted on the last page only (where the
+// FAQ block visibly renders) so paginated articles don't duplicate it
+// across pages and so the schema mirrors what the reader sees.
+const faqSchema = (isLastPage && hasFaqs)
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: article.faqs!.map(({ q, a }) => ({
+        '@type': 'Question',
+        name: q,
+        acceptedAnswer: { '@type': 'Answer', text: a },
+      })),
+    }
+  : null;
+
 // JSON-LD Article schema
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -224,6 +241,9 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
   nextPageHref={nextPageHref}
 >
   <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  {faqSchema && (
+    <script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />
+  )}
 
   <Header />
 
@@ -405,6 +425,20 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
                 Iscriviti agli aggiornamenti
               </button>
             </div>
+          )}
+
+          {isLastPage && hasFaqs && (
+            <section class="ist-faqs" aria-labelledby="ist-faqs-heading">
+              <h2 id="ist-faqs-heading" class="ist-faqs__heading">Domande frequenti</h2>
+              <dl class="ist-faqs__list">
+                {article.faqs!.map(({ q, a }) => (
+                  <div class="ist-faqs__item">
+                    <dt class="ist-faqs__question">{q}</dt>
+                    <dd class="ist-faqs__answer">{a}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
           )}
 
           {isLastPage && (hasSources || hasCitedSources) && (
