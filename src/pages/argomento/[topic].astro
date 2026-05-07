@@ -103,7 +103,7 @@ const itemListSchema = topicArticles.length > 0
           url: `${siteOrigin}/${article.data.topic}/${article.id}/`,
           name: article.data.title,
           datePublished: article.data.publishedDate,
-          image: article.data.heroImage ?? undefined,
+          image: article.data.heroImage ? new URL(article.data.heroImage, Astro.site).toString() : undefined,
         },
       })),
     }
