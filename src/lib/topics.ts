@@ -15,6 +15,28 @@
 import { getCollection } from 'astro:content';
 import siteConfig from 'virtual:agentic-media/site-config';
 
+// ---------------------------------------------------------------------------
+// Tag vocabulary helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Resolve a tag slug to its display label using the site's tag_vocabulary.
+ *
+ * Falls back to the slug itself when the slug is not listed in the
+ * vocabulary — so articles with unlisted tags still render cleanly.
+ *
+ * Usage (in ArticleLayout, ArticleCard, etc.):
+ *   const resolved = resolveTags(article.tags, siteConfig.tag_vocabulary);
+ *   // resolved: Array<{ slug: string; label: string }>
+ */
+export function resolveTags(
+  slugs: string[],
+  vocabulary: ReadonlyArray<{ slug: string; label: string }>,
+): Array<{ slug: string; label: string }> {
+  const map = new Map(vocabulary.map((e) => [e.slug, e.label]));
+  return slugs.map((slug) => ({ slug, label: map.get(slug) ?? slug }));
+}
+
 export type Topic = {
   slug: string;
   label: string;

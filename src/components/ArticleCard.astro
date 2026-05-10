@@ -1,6 +1,7 @@
 ---
 import siteConfig from 'virtual:agentic-media/site-config';
 import TagPill from './TagPill.astro';
+import { resolveTags } from '../lib/topics';
 
 export interface Props {
   title: string;
@@ -56,6 +57,9 @@ const cardSrcset = hasDerivatives
   : '';
 // 3-col grid → 2-col → 1-col across the std breakpoints.
 const cardSizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
+
+// Resolve tag slugs → {slug, label} using the site's tag_vocabulary.
+const resolvedTags = resolveTags(tags, siteConfig.tag_vocabulary ?? []);
 ---
 
 <article class="ist-article-card" itemscope itemtype="https://schema.org/Article">
@@ -123,9 +127,9 @@ const cardSizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw';
     </p>
 
     <div class="ist-article-card__footer">
-      {tags.length > 0 && (
+      {resolvedTags.length > 0 && (
         <div class="ist-article-card__tags">
-          {tags.slice(0, 3).map((tag) => (
+          {resolvedTags.slice(0, 3).map((tag) => (
             <TagPill tag={tag} topic={topic} />
           ))}
         </div>
