@@ -9,6 +9,7 @@ import Sidebar from '../components/Sidebar.astro';
 import StickySidebar from '../components/StickySidebar.astro';
 import Sources from '../components/Sources.astro';
 import TagPill from '../components/TagPill.astro';
+import { resolveTags } from '../lib/topics';
 import sourcesCache from 'virtual:agentic-media/sources-cache';
 import { getCollection } from 'astro:content';
 
@@ -67,6 +68,10 @@ const topicLabels: Record<string, string> = Object.fromEntries(
 );
 
 const topicLabel = topicLabels[article.topic] ?? article.topic;
+
+// Resolve tag slugs → {slug, label} for chip rendering.
+// URLs still use slug; label comes from tag_vocabulary (falls back to slug).
+const resolvedTags = resolveTags(article.tags, siteConfig.tag_vocabulary ?? []);
 
 const authors = await getCollection('authors');
 const authorData = authors.find(
@@ -407,9 +412,9 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
                   </div>
                 </div>
 
-                {article.tags.length > 0 && (
+                {resolvedTags.length > 0 && (
                   <div class="ist-single__tags">
-                    {article.tags.map((tag) => (
+                    {resolvedTags.map((tag) => (
                       <TagPill tag={tag} topic={article.topic} />
                     ))}
                   </div>

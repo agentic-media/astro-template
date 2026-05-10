@@ -33,6 +33,16 @@ topics:
   - { slug: "argomento-2", label: "Argomento 2", description: "Sed do eiusmod tempor.", icon: "📚" }
   - { slug: "argomento-3", label: "Argomento 3", description: "Ut enim ad minim veniam.", icon: "🗞️" }
 
+# Controlled vocabulary for tag chips.
+# Slug = what appears in article frontmatter `tags:` and in URLs.
+# Label = human-readable text rendered on the chip (spaces, accents OK).
+# Bare strings are accepted for backwards compatibility (label falls back to slug).
+# Omit the block entirely to render slugs verbatim (safe default).
+tag_vocabulary:
+  - { slug: "argomento-1", label: "Argomento 1" }
+  - { slug: "argomento-e-altro", label: "Argomento e Altro" }  # slug is kebab, label has spaces
+  - "bare-slug"                                                  # backwards-compat: label = "bare-slug"
+
 topicsPage:
   title: "Argomenti"
   lede:  "Scegli un tema per esplorare gli articoli."

@@ -1,6 +1,9 @@
 ---
 export interface Props {
-  tag: string;
+  /** Resolved tag: always pass {slug, label} — slug drives the URL, label
+   *  is the visible chip text. Call resolveTagLabel() in the parent to
+   *  derive the label from site.config.yaml::tag_vocabulary. */
+  tag: { slug: string; label: string };
   topic?: string;
 }
 
@@ -8,10 +11,10 @@ const { tag, topic } = Astro.props;
 
 // Build URL: if topic provided, link to topic page with tag filter; otherwise generic tag page
 const href = topic
-  ? `/argomento/${topic}/?tag=${encodeURIComponent(tag)}`
-  : `/tag/${encodeURIComponent(tag)}/`;
+  ? `/argomento/${topic}/?tag=${encodeURIComponent(tag.slug)}`
+  : `/tag/${encodeURIComponent(tag.slug)}/`;
 ---
 
 <a href={href} class="ist-tag" rel="tag">
-  {tag}
+  {tag.label}
 </a>

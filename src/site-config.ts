@@ -16,6 +16,16 @@ const TopicSchema = z.object({
   icon: z.string().optional(),
 });
 
+// A tag entry may be a bare slug string (legacy) or a {slug, label} object.
+// Bare strings are normalised to {slug, label} at validation time so all
+// downstream code can rely on the object shape.
+const TagEntrySchema = z.union([
+  z.string().transform((s) => ({ slug: s, label: s })),
+  z.object({ slug: z.string(), label: z.string() }),
+]);
+
+export type TagEntry = { slug: string; label: string };
+
 const FooterLinkSchema = z.object({
   href: z.string(),
   label: z.string(),
@@ -39,6 +49,17 @@ export const SiteConfigSchema = z.object({
     emptyBody: z.string().default(''),
   }).default({}),
   topics: z.array(TopicSchema).default([]),
+  // Controlled vocabulary for tag chips. Each entry maps a slug (used in
+  // article frontmatter `tags:` and in URLs) to a human-readable label
+  // (rendered on the chip). Bare string entries are backwards-compatible
+  // with the flat-slug form used before this field was introduced.
+  //
+  // Example (site.config.yaml):
+  //   tag_vocabulary:
+  //     - { slug: "isee-fisco", label: "ISEE e Fisco" }
+  //     - { slug: "pensioni",   label: "Pensioni" }
+  //     - "bonus"               # bare slug — label falls back to "bonus"
+  tag_vocabulary: z.array(TagEntrySchema).default([]),
   /** Optional per-slug display name overrides for topic hubs. When a
    *  slug is absent from this map the template falls back to Title-Case
    *  derivation (hyphens → spaces, first letter of each word capitalised).
