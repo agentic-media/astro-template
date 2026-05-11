@@ -335,7 +335,13 @@ const heroSizes = '(min-width: 1024px) 800px, 100vw';
   <main>
     <div class="ist-container">
       <div class="ist-article-cols">
-        <article class="ist-single" itemscope itemtype="https://schema.org/Article">
+        <article
+          class="ist-single"
+          itemscope
+          itemtype="https://schema.org/Article"
+          data-pagefind-body
+          data-pagefind-meta={`title:${article.title}, date:${article.publishedDate}, author:${article.author}`}
+        >
           {isFirstPage ? (
             <header class="ist-single__cover">
               {article.heroImage ? (
