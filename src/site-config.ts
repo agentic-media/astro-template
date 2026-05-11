@@ -143,6 +143,36 @@ export const SiteConfigSchema = z.object({
     middle: z.string().default(''),
     bottom: z.string().default('TEMPLATE'),
   }).default({}),
+  // Search / Pagefind configuration. Consumers set language-specific
+  // strings here so the template stays language-agnostic.
+  //
+  // Example (site.config.yaml — Italian site):
+  //
+  //   search:
+  //     path: /cerca/
+  //     label: Cerca
+  //     placeholder: "Cerca articoli…"
+  //     uiTranslations:
+  //       placeholder: "Cerca articoli…"
+  //       zero_results: 'Nessun risultato per "[SEARCH_TERM]".'
+  //       many_results: '[COUNT] risultati per "[SEARCH_TERM]"'
+  //       one_result:   '1 risultato per "[SEARCH_TERM]"'
+  //       alt_search:   'Nessun risultato per "[SEARCH_TERM]". Prova con "[DIFFERENT_TERM]"?'
+  //       search_label: "Cerca in questo sito"
+  //       filters_label: "Filtri"
+  //       clear_search:  "Cancella"
+  //       load_more:     "Carica altri risultati"
+  //       search_hint:   "Inizia a scrivere per cercare…"
+  search: z.object({
+    /** URL path of the search results page. Default: /search/ */
+    path: z.string().default('/search/'),
+    /** Label shown in the sidebar widget heading and as the submit button aria-label. */
+    label: z.string().default('Search'),
+    /** Placeholder text for the sidebar search input. */
+    placeholder: z.string().default('Search articles…'),
+    /** Pagefind UI translation strings. Omit keys to use Pagefind defaults. */
+    uiTranslations: z.record(z.string(), z.string()).default({}),
+  }).default({}),
   // Per-site CSS variable overrides. The integration emits these as
   // `<style is:global>:root { --foo: bar; }</style>` in <head>, layered
   // AFTER the template's default tokens in `src/styles/global.css` —

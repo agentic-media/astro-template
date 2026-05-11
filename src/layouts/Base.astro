@@ -300,7 +300,7 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
           '@type': 'SearchAction',
           target: {
             '@type': 'EntryPoint',
-            urlTemplate: `${(Astro.site?.toString() ?? '').replace(/\/$/, '')}/cerca/?q={search_term_string}`,
+            urlTemplate: `${(Astro.site?.toString() ?? '').replace(/\/$/, '')}${siteConfig.search.path}?q={search_term_string}`,
           },
           'query-input': 'required name=search_term_string',
         },
