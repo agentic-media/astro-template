@@ -245,6 +245,14 @@ const webPageSchema = {
   },
 };
 
+// Emit ISO 8601 datetime strings with UTC timezone (Z suffix) so Google
+// Rich Results validator accepts them. YAML date strings like "2026-03-23"
+// are parsed as midnight UTC by Date(), and toISOString() returns the
+// canonical "2026-03-23T00:00:00.000Z" format Google expects.
+function toISODate(dateStr: string): string {
+  return new Date(dateStr).toISOString();
+}
+
 // JSON-LD Article schema
 const articleSchema = {
   '@context': 'https://schema.org',
@@ -252,8 +260,8 @@ const articleSchema = {
   headline: article.title,
   description: article.description,
   image: article.heroImage ? new URL(article.heroImage, Astro.site).toString() : null,
-  datePublished: article.publishedDate,
-  dateModified: article.modifiedDate ?? article.publishedDate,
+  datePublished: toISODate(article.publishedDate),
+  dateModified: toISODate(article.modifiedDate ?? article.publishedDate),
   author: {
     '@type': 'Person',
     name: article.author,
@@ -268,7 +276,11 @@ const articleSchema = {
       url: new URL('/logo.png', Astro.site).toString(),
     },
   },
-  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  // Pure @id reference — the standalone webPageSchema below fully declares
+  // this entity. Inlining @type here causes Google to parse two Article-typed
+  // nodes when it merges the cross-reference, producing the "second copy
+  // missing author" warning in Rich Results.
+  mainEntityOfPage: { '@id': canonical },
   isPartOf: hasMultiplePages
     ? {
         '@type': 'CreativeWork',
