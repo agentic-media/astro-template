@@ -51,6 +51,13 @@ const ROUTES: Array<{ pattern: string; entrypoint: string }> = [
   { pattern: '/autore/[slug]',                    entrypoint: '@agentic-media/astro-template/pages/autore/[slug].astro' },
   { pattern: '/autore/[slug]/pagina/[page]',      entrypoint: '@agentic-media/astro-template/pages/autore/[slug]/pagina/[page].astro' },
   { pattern: '/[topic]/[slug]/[...page]',         entrypoint: '@agentic-media/astro-template/pages/[topic]/[slug]/[...page].astro' },
+  // Language-agnostic search page. Default English route: /search/.
+  // Consumer sites that want a localised path (e.g. /cerca/) add their
+  // own src/pages/cerca.astro — Astro project files win over injected
+  // routes. They also set `search.path: /cerca/` in site.config.yaml so
+  // the sidebar form, JSON-LD SearchAction, and canonical URL all resolve
+  // consistently.
+  { pattern: '/search',                           entrypoint: '@agentic-media/astro-template/pages/search.astro' },
 ];
 
 export interface AgenticMediaTemplateOptions {
