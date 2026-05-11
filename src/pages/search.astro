@@ -1,16 +1,37 @@
 ---
+/**
+ * Template search page — injected at the path defined by
+ * `site.config.yaml::search.path` (default: `/search/`).
+ *
+ * Consumers never ship this file. They own the URL path and all UI
+ * strings via `site.config.yaml::search`:
+ *
+ *   search:
+ *     path:        "/cerca/"
+ *     label:       "Cerca"
+ *     placeholder: "Cerca articoli…"
+ *     uiTranslations:
+ *       placeholder:   "Cerca articoli…"
+ *       zero_results:  'Nessun risultato per "[SEARCH_TERM]".'
+ *       …
+ *
+ * The injectRoute call in integration.ts reads `siteConfig.search.path`
+ * and injects this page at that pattern, so:
+ *   - Italian site  →  /cerca/
+ *   - English site  →  /search/
+ *   - Any site      →  whatever path the YAML specifies
+ */
 import siteConfig from 'virtual:agentic-media/site-config';
 import Base from '../layouts/Base.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 
-const siteName = siteConfig.identity.name;
-const q = Astro.url.searchParams.get('q') ?? '';
-
-const searchLabel       = siteConfig.search.label;
-const searchPath        = siteConfig.search.path;
-const uiTranslations    = siteConfig.search.uiTranslations;
+const siteName       = siteConfig.identity.name;
+const q              = Astro.url.searchParams.get('q') ?? '';
+const searchLabel    = siteConfig.search.label;
+const searchPath     = siteConfig.search.path;
+const uiTranslations = siteConfig.search.uiTranslations;
 
 const breadcrumbItems = [
   { label: 'Home', href: '/' },
@@ -31,16 +52,12 @@ const breadcrumbItems = [
   </div>
 
   <main>
-    <div class="ist-container ist-cerca-wrap">
-      <h1 class="ist-cerca-heading">{searchLabel}</h1>
+    <div class="ist-container ist-search-wrap">
+      <h1 class="ist-search-heading">{searchLabel}</h1>
 
-      <!-- Pagefind UI mounts here. The JS below initialises it and
-           pre-fills the query from ?q= when the sidebar search form
-           submits to this page. -->
       <div id="ist-pagefind-ui" class="ist-pagefind-ui"></div>
 
-      <!-- Fallback shown only before the index is built (dev mode). -->
-      <p id="ist-pagefind-fallback" class="ist-cerca-fallback" hidden>
+      <p id="ist-pagefind-fallback" class="ist-search-fallback" hidden>
         Search index not available. Run
         <code>astro build &amp;&amp; pagefind --site dist</code> first.
       </p>
@@ -51,12 +68,12 @@ const breadcrumbItems = [
 </Base>
 
 <style>
-  .ist-cerca-wrap {
+  .ist-search-wrap {
     padding-block: 40px 80px;
     max-width: 860px;
   }
 
-  .ist-cerca-heading {
+  .ist-search-heading {
     font-size: var(--fs-h2);
     font-family: var(--font-heading);
     font-weight: 700;
@@ -64,7 +81,7 @@ const breadcrumbItems = [
     margin-block-end: 28px;
   }
 
-  .ist-cerca-fallback {
+  .ist-search-fallback {
     color: var(--contrast-2);
     padding-block: 24px;
   }
@@ -76,47 +93,33 @@ const breadcrumbItems = [
      ------------------------------------------------------------------ */
   .ist-pagefind-ui {
     --pagefind-ui-scale: 1;
-    --pagefind-ui-primary:        var(--accent);
-    --pagefind-ui-text:           var(--contrast);
-    --pagefind-ui-background:     var(--base-3);
-    --pagefind-ui-border:         var(--hairline);
-    --pagefind-ui-tag:            var(--base-2);
-    --pagefind-ui-border-width:   1px;
-    --pagefind-ui-border-radius:  var(--radius-cta, 6px);
+    --pagefind-ui-primary:             var(--accent);
+    --pagefind-ui-text:                var(--contrast);
+    --pagefind-ui-background:          var(--base-3);
+    --pagefind-ui-border:              var(--hairline);
+    --pagefind-ui-tag:                 var(--base-2);
+    --pagefind-ui-border-width:        1px;
+    --pagefind-ui-border-radius:       var(--radius-cta, 6px);
     --pagefind-ui-image-border-radius: var(--radius-card, 8px);
-    --pagefind-ui-font:           var(--font-body);
+    --pagefind-ui-font:                var(--font-body);
   }
 </style>
 
 <script define:vars={{ initialQuery: q, uiTranslations }}>
-  // Pagefind UI lazy-loads on first interaction. On this page we mount
-  // it immediately and pre-fill from the ?q= param so the sidebar search
-  // form works without any redirect tricks.
   async function initPagefind() {
     const { PagefindUI } = await import('/pagefind/pagefind-ui.js');
     const ui = new PagefindUI({
       element: '#ist-pagefind-ui',
       showImages: false,
-      // uiTranslations comes from siteConfig.search.uiTranslations (set in
-      // site.config.yaml). Empty object → Pagefind's built-in defaults.
       translations: Object.keys(uiTranslations).length > 0 ? uiTranslations : undefined,
     });
-
-    // Pre-fill from ?q= (sidebar form submission) or URL hash fallback.
     const prefill = initialQuery || new URLSearchParams(location.search).get('q') || '';
-    if (prefill) {
-      ui.triggerSearch(prefill);
-    }
+    if (prefill) ui.triggerSearch(prefill);
   }
-
-  // Pagefind UI JS is only present after `astro build && pagefind --site dist`.
-  // In dev (astro dev), gracefully show the fallback message.
   try {
     await initPagefind();
   } catch {
     const fallback = document.getElementById('ist-pagefind-fallback');
-    if (fallback) {
-      fallback.hidden = false;
-    }
+    if (fallback) fallback.hidden = false;
   }
 </script>
