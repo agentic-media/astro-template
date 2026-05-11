@@ -63,7 +63,7 @@ const websiteSchema = {
     '@type': 'SearchAction',
     target: {
       '@type': 'EntryPoint',
-      urlTemplate: `${siteOrigin}/cerca/?q={search_term_string}`,
+      urlTemplate: `${siteOrigin}${siteConfig.search.path}?q={search_term_string}`,
     },
     'query-input': 'required name=search_term_string',
   },
