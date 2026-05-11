@@ -183,6 +183,31 @@ export const SiteConfigSchema = z.object({
       derivatives: z.array(z.number().int().positive()).default([]),
     }).default({}),
   }).default({}),
+  // Search page config. The integration injects the template's search
+  // page at `search.path` so consumers need ZERO files in src/pages/.
+  // All UI strings come from this block; the integration falls back to
+  // the defaults below when the block is omitted.
+  //
+  // Example (site.config.yaml, Italian consumer):
+  //   search:
+  //     path: "/cerca/"
+  //     label: "Cerca"
+  //     placeholder: "Cerca articoli…"
+  //     uiTranslations:
+  //       placeholder: "Cerca articoli…"
+  //       zero_results: 'Nessun risultato per "[SEARCH_TERM]".'
+  //       …
+  search: z.object({
+    /** URL path where the search page is injected. */
+    path: z.string().default('/search/'),
+    /** Human-readable label used in the page title and breadcrumb. */
+    label: z.string().default('Search'),
+    /** Input placeholder text. */
+    placeholder: z.string().default('Search articles…'),
+    /** Pagefind UI translation strings. Any key absent here falls back
+     *  to Pagefind's own defaults (English). */
+    uiTranslations: z.record(z.string(), z.string()).default({}),
+  }).default({}),
   // Opt-in feature flags. Each flag defaults to false so existing
   // consumer sites that omit this block are unaffected.
   //

@@ -165,7 +165,21 @@ export default function agenticMediaTemplate(
           injectRoute(r);
           count++;
         }
-        logger.info(`injected ${count} routes; site=${siteConfig.identity.url}`);
+
+        // Inject the search page at the consumer-configured path.
+        // The path comes from site.config.yaml::search.path (default: /search/).
+        // Consumers never need a src/pages/ file for search — the URL is
+        // controlled entirely by YAML config.
+        const searchPattern = siteConfig.search?.path ?? '/search/';
+        if (!exclude.has(searchPattern)) {
+          injectRoute({
+            pattern: searchPattern,
+            entrypoint: '@agentic-media/astro-template/pages/search.astro',
+          });
+          count++;
+        }
+
+        logger.info(`injected ${count} routes (search at ${searchPattern}); site=${siteConfig.identity.url}`);
       },
     },
   };

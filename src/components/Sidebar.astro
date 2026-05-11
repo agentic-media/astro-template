@@ -34,18 +34,18 @@ function formatDate(dateStr: string) {
 
 <!-- Search Widget -->
 <div class="ist-widget">
-  <h3 class="ist-widget__title">Cerca</h3>
-  <form class="ist-search" role="search" action="/cerca/" method="get">
-    <label for="sidebar-search" class="sr-only">Cerca articoli</label>
+  <h3 class="ist-widget__title">{siteConfig.search.label}</h3>
+  <form class="ist-search" role="search" action={siteConfig.search.path} method="get">
+    <label for="sidebar-search" class="sr-only">{siteConfig.search.label}</label>
     <input
       class="ist-search__input"
       type="search"
       id="sidebar-search"
       name="q"
-      placeholder="Cerca articoli…"
+      placeholder={siteConfig.search.placeholder}
       autocomplete="off"
     />
-    <button class="ist-search__btn" type="submit" aria-label="Cerca">
+    <button class="ist-search__btn" type="submit" aria-label={siteConfig.search.label}>
       🔍
     </button>
   </form>
