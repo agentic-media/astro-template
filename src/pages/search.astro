@@ -55,7 +55,12 @@ const breadcrumbItems = [
     <div class="ist-container ist-search-wrap">
       <h1 class="ist-search-heading">{searchLabel}</h1>
 
-      <div id="ist-pagefind-ui" class="ist-pagefind-ui"></div>
+      <div
+        id="ist-pagefind-ui"
+        class="ist-pagefind-ui"
+        data-initial-query={q}
+        data-ui-translations={JSON.stringify(uiTranslations)}
+      ></div>
 
       <p id="ist-pagefind-fallback" class="ist-search-fallback" hidden>
         Search index not available. Run
@@ -105,7 +110,26 @@ const breadcrumbItems = [
   }
 </style>
 
-<script define:vars={{ initialQuery: q, uiTranslations }}>
+<script is:inline type="module">
+  // Must be is:inline + type="module":
+  //   - is:inline prevents Vite bundling, which would choke on the
+  //     /pagefind/pagefind-ui.js URL (a build-time-generated asset,
+  //     not a source file Vite can resolve).
+  //   - type="module" gives the script module semantics so top-level
+  //     await is legal. Without it the browser parses a classic script
+  //     and throws: "await is only valid in async functions and the
+  //     top level bodies of modules".
+  //   - define:vars must NOT be used: it also forces is:inline but emits
+  //     the script wrapped in an IIFE, losing module semantics.
+  //
+  // Data bridging: server-rendered values are passed via data-* attrs on
+  // the container div, then read here at runtime.
+  const container = document.getElementById('ist-pagefind-ui');
+  const initialQuery = container?.dataset.initialQuery ?? '';
+  const uiTranslations = container?.dataset.uiTranslations
+    ? JSON.parse(container.dataset.uiTranslations)
+    : {};
+
   async function initPagefind() {
     const { PagefindUI } = await import('/pagefind/pagefind-ui.js');
     const ui = new PagefindUI({
