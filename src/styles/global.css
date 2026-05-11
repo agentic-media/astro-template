@@ -2253,7 +2253,11 @@ p {
   .ist-single .ist-author-box {
     margin: 0 auto 28px;
     max-width: var(--article-width);
-    padding: 0 56px;
+    /* Restore block padding zeroed by this override; horizontal indent stays
+       at 56px to align with the article column, but vertical padding must
+       match the base .ist-author-box rule (28px) so the gray card breathes
+       above and below on tablet and desktop. (#179) */
+    padding: 28px 56px;
   }
 }
 
