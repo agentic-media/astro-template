@@ -16,6 +16,14 @@ const articles = defineCollection({
     topic: z.string(),
     heroImage: z.string().optional(),
     heroImageAlt: z.string().optional(),
+    // Retrieval-shaped 100-200 word abstract distinct from `description`
+    // (SERP snippet). First sentence names the article's specific angle/lens
+    // (not topic restatement). Drives corpus-index discovery, mongo summary
+    // lookups, schema.org Article.abstract JSON-LD, and future vector
+    // embedding. Optional during migration; populated by iter#4 cascade
+    // onwards. See agentic-media/control-center/skills/writer/
+    // seo-rewrite-brief §9 checklist.
+    summary: z.string().optional(),
     sources: z
       .array(
         z.object({
