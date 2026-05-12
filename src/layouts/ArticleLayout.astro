@@ -259,6 +259,11 @@ const articleSchema = {
   '@type': 'Article',
   headline: article.title,
   description: article.description,
+  // Article.abstract — retrieval-shaped 100-200 word summary distinct from the
+  // SEO description. AI crawlers (ChatGPT, Perplexity, Claude, Google AI) respect
+  // schema.org Article.abstract; readers don't see it. Optional — sites whose
+  // article frontmatter doesn't carry `summary:` skip this property.
+  ...(article.summary ? { abstract: article.summary } : {}),
   image: article.heroImage ? new URL(article.heroImage, Astro.site).toString() : null,
   datePublished: toISODate(article.publishedDate),
   dateModified: toISODate(article.modifiedDate ?? article.publishedDate),
