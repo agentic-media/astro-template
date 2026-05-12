@@ -21,6 +21,16 @@ export interface Props {
   description: string;
   canonicalUrl?: string;
   ogImage?: string;
+  /** Optional override for og:image dimensions / type / alt. When unset,
+      width and height default to siteConfig.media.hero (1200×630-ish for
+      most sites); type defaults to image/webp (3venezie hero invariant);
+      alt defaults to the page title. Telegram, WhatsApp, Facebook and
+      Google crawlers all expect these meta keys to render link previews
+      reliably — emitting only og:image is insufficient. */
+  ogImageWidth?: number;
+  ogImageHeight?: number;
+  ogImageType?: string;
+  ogImageAlt?: string;
   /** Article hero image. When set on `type="article"` pages, emitted as
       `<link rel="preload" as="image" href={heroImage}>` so the LCP image
       starts fetching alongside the HTML. Skips when missing or when
@@ -45,6 +55,10 @@ const {
   description,
   canonicalUrl,
   ogImage = '/og-default.jpg',
+  ogImageWidth,
+  ogImageHeight,
+  ogImageType,
+  ogImageAlt,
   heroImage,
   publishedTime,
   modifiedTime,
@@ -97,6 +111,15 @@ const canonical = canonicalUrl ?? Astro.url.href;
 const ogImageAbsolute = ogImage.startsWith('http')
   ? ogImage
   : new URL(ogImage, Astro.site ?? Astro.url).toString();
+
+// og:image companions. Default width/height from site.config.yaml::media.hero
+// (the same source ArticleLayout + ArticleCard use). Default type to image/webp
+// since 3venezie's hero invariant is WebP; sites with JPG/PNG heroes can override.
+// Default alt to title when caller did not pass one explicitly.
+const resolvedOgImageWidth  = ogImageWidth  ?? siteConfig.media.hero.width;
+const resolvedOgImageHeight = ogImageHeight ?? siteConfig.media.hero.height;
+const resolvedOgImageType   = ogImageType   ?? 'image/webp';
+const resolvedOgImageAlt    = ogImageAlt    ?? title;
 // Append " — siteName" UNLESS the caller already included it (e.g.
 // passed `title={`Contatti — ${siteName}`}`). Avoids "Foo — Pesce — Pesce".
 const fullTitle = (title === cfg.siteName || title.endsWith(`— ${cfg.siteName}`))
@@ -194,6 +217,10 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImageAbsolute} />
+    <meta property="og:image:width" content={resolvedOgImageWidth} />
+    <meta property="og:image:height" content={resolvedOgImageHeight} />
+    <meta property="og:image:type" content={resolvedOgImageType} />
+    <meta property="og:image:alt" content={resolvedOgImageAlt} />
     <meta property="og:url" content={canonical} />
     <meta property="og:type" content={type} />
     <meta property="og:locale" content={cfg.ogLocale} />
@@ -207,6 +234,7 @@ const consentConfig = cfg.cmpProvider === 'consent.js'
     <meta name="twitter:title" content={fullTitle} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageAbsolute} />
+    <meta name="twitter:image:alt" content={resolvedOgImageAlt} />
 
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
