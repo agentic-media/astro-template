@@ -158,6 +158,12 @@ export const SiteConfigSchema = z.object({
         sized horizontally (e.g. PENSION€ROMA at 1545×356 — max-width
         ~320 keeps the wordmark legible). */
     imageMaxWidth: z.number().int().min(80).max(1200).optional(),
+    /** Whether to render the image logo in the Footer. Defaults to true
+        for consistency with Header. Sites with a dark footer + a dark
+        logo (where the wordmark would be unreadable) can set this to
+        false; Footer skips the logo block entirely and starts with the
+        description lede. */
+    imageInFooter: z.boolean().default(true),
   }).default({}),
   // Search / Pagefind configuration. Consumers set language-specific
   // strings here so the template stays language-agnostic.

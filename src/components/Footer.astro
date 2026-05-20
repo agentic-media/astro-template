@@ -45,6 +45,11 @@ const logoImageMaxWidth = siteConfig.logo.imageMaxWidth;
 const logoImageStyle = logoImageMaxWidth
   ? `max-width:${logoImageMaxWidth}px;height:auto;`
   : `max-height:${logoImageMaxHeight}px;`;
+const imageInFooter = siteConfig.logo.imageInFooter ?? true;
+// Hide the footer brand <a> entirely only when the consumer has opted
+// out (logo.imageInFooter:false) AND there's a configured image logo.
+// Sites still using the text wordmark always get the footer wordmark.
+const showFooterLogo = !logoImage || imageInFooter;
 const currentYear = new Date().getFullYear();
 ---
 
@@ -53,17 +58,19 @@ const currentYear = new Date().getFullYear();
     <div class="ist-footer__grid">
       <!-- Brand column -->
       <div class="ist-footer__brand">
-        <a href="/" class:list={["ist-logo", "ist-footer__logo", { "ist-logo--image": !!logoImage }]} aria-label={siteName}>
-          {logoImage ? (
-            <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={logoImageStyle} />
-          ) : (
-            <>
-              <span class="ist-logo__top">{logoTop}</span>
-              {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
-              <span class="ist-logo__bottom">{logoBottom}</span>
-            </>
-          )}
-        </a>
+        {showFooterLogo && (
+          <a href="/" class:list={["ist-logo", "ist-footer__logo", { "ist-logo--image": !!logoImage }]} aria-label={siteName}>
+            {logoImage ? (
+              <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={logoImageStyle} />
+            ) : (
+              <>
+                <span class="ist-logo__top">{logoTop}</span>
+                {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
+                <span class="ist-logo__bottom">{logoBottom}</span>
+              </>
+            )}
+          </a>
+        )}
         {siteDescription && (
           <p class="ist-footer__lede">
             {siteDescription}
