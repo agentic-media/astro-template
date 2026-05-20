@@ -142,6 +142,17 @@ export const SiteConfigSchema = z.object({
     top: z.string().default('BRAND'),
     middle: z.string().default(''),
     bottom: z.string().default('TEMPLATE'),
+    /** Optional image logo URL. If set, replaces the text wordmark in
+        Header and Footer with an <img>. Use a public-dir path like
+        `/logo.svg` or `/logo.png`. SVG preferred for sharp scaling. */
+    image: z.string().optional(),
+    /** Optional alt text for the image logo. Falls back to identity.name
+        when omitted. Only used when logo.image is set. */
+    imageAlt: z.string().optional(),
+    /** Optional rendered max height in px for the image logo. Default 56.
+        Adjust per site if the logo's aspect ratio needs more vertical
+        room. */
+    imageMaxHeight: z.number().int().min(20).max(160).default(56),
   }).default({}),
   // Search / Pagefind configuration. Consumers set language-specific
   // strings here so the template stays language-agnostic.

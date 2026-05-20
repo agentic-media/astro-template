@@ -38,6 +38,9 @@ const {
   topicsTitle = siteConfig.footer.topicsTitle,
   linksTitle = siteConfig.footer.linksTitle,
 } = Astro.props as Props;
+const logoImage = siteConfig.logo.image;
+const logoImageAlt = siteConfig.logo.imageAlt ?? siteName;
+const logoImageMaxHeight = siteConfig.logo.imageMaxHeight ?? 56;
 const currentYear = new Date().getFullYear();
 ---
 
@@ -46,10 +49,16 @@ const currentYear = new Date().getFullYear();
     <div class="ist-footer__grid">
       <!-- Brand column -->
       <div class="ist-footer__brand">
-        <a href="/" class="ist-logo ist-footer__logo" aria-label={siteName}>
-          <span class="ist-logo__top">{logoTop}</span>
-          {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
-          <span class="ist-logo__bottom">{logoBottom}</span>
+        <a href="/" class:list={["ist-logo", "ist-footer__logo", { "ist-logo--image": !!logoImage }]} aria-label={siteName}>
+          {logoImage ? (
+            <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={`max-height:${logoImageMaxHeight}px;`} />
+          ) : (
+            <>
+              <span class="ist-logo__top">{logoTop}</span>
+              {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
+              <span class="ist-logo__bottom">{logoBottom}</span>
+            </>
+          )}
         </a>
         {siteDescription && (
           <p class="ist-footer__lede">

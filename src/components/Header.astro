@@ -36,16 +36,26 @@ const {
   topicsLabel = siteConfig.header.topicsLabel,
 } = Astro.props as Props;
 
+const logoImage = siteConfig.logo.image;
+const logoImageAlt = siteConfig.logo.imageAlt ?? siteName;
+const logoImageMaxHeight = siteConfig.logo.imageMaxHeight ?? 56;
+
 ---
 
 <header class="ist-header">
   <div class="ist-container">
     <div class="ist-header__inner">
-      <!-- CSS Wordmark Logo -->
-      <a href="/" class:list={["ist-logo", { "ist-logo--dual-tone": dualTone }]} aria-label={`${siteName} - Homepage`}>
-        <span class="ist-logo__top">{logoTop}</span>
-        {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
-        <span class="ist-logo__bottom">{logoBottom}</span>
+      <!-- Logo: image when configured, CSS wordmark otherwise. -->
+      <a href="/" class:list={["ist-logo", { "ist-logo--dual-tone": dualTone, "ist-logo--image": !!logoImage }]} aria-label={`${siteName} - Homepage`}>
+        {logoImage ? (
+          <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={`max-height:${logoImageMaxHeight}px;`} />
+        ) : (
+          <>
+            <span class="ist-logo__top">{logoTop}</span>
+            {logoMiddle && <span class="ist-logo__salute">{logoMiddle}</span>}
+            <span class="ist-logo__bottom">{logoBottom}</span>
+          </>
+        )}
       </a>
 
       <!-- Mobile nav toggle -->

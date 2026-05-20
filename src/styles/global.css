@@ -228,6 +228,24 @@ p {
   opacity: 0.7;
 }
 
+/* Image logo variant — opt-in via logo.image in site.config.yaml.
+   Collapses the wordmark flex column into a single inline-flex so the
+   <img> sizes by its natural aspect ratio. max-height comes from the
+   inline style emitted by Header/Footer (logo.imageMaxHeight, default 56). */
+.ist-logo--image {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0;
+}
+
+.ist-logo__img {
+  display: block;
+  width: auto;
+  height: auto;
+  /* max-height set inline from siteConfig.logo.imageMaxHeight. */
+}
+
 /* ------------------------------------------------------------
    Navigation
    ------------------------------------------------------------ */
