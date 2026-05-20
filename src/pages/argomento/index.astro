@@ -29,13 +29,13 @@ const siteName = siteConfig.identity.name;
   <Header />
 
   <main>
-    <div style="background:var(--navy); color:#fff; padding:40px 0 32px;">
+    <div style="background:var(--hero-bg, var(--navy)); color:var(--hero-fg, #fff); padding:40px 0 32px;">
       <div class="ist-container">
-        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:#fff; margin-bottom:12px;">
+        <h1 style="font-size:clamp(1.8rem,4vw,2.8rem); font-weight:700; color:var(--hero-fg, #fff); margin-bottom:12px;">
           {siteConfig.topicsPage.title}
         </h1>
         {siteConfig.topicsPage.lede && (
-          <p style="color:rgba(255,255,255,0.72); max-width:55ch; line-height:1.6;">
+          <p style="color:var(--hero-lede-fg, rgba(255,255,255,0.72)); max-width:55ch; line-height:1.6;">
             {siteConfig.topicsPage.lede}
           </p>
         )}

@@ -142,6 +142,28 @@ export const SiteConfigSchema = z.object({
     top: z.string().default('BRAND'),
     middle: z.string().default(''),
     bottom: z.string().default('TEMPLATE'),
+    /** Optional image logo URL. If set, replaces the text wordmark in
+        Header and Footer with an <img>. Use a public-dir path like
+        `/logo.svg` or `/logo.png`. SVG preferred for sharp scaling. */
+    image: z.string().optional(),
+    /** Optional alt text for the image logo. Falls back to identity.name
+        when omitted. Only used when logo.image is set. */
+    imageAlt: z.string().optional(),
+    /** Optional rendered max height in px for the image logo. Default 56.
+        Adjust per site if the logo's aspect ratio needs more vertical
+        room. */
+    imageMaxHeight: z.number().int().min(20).max(160).default(56),
+    /** Optional rendered max width in px for the image logo. When set,
+        wins over imageMaxHeight for wide-aspect logos that read better
+        sized horizontally (e.g. PENSION€ROMA at 1545×356 — max-width
+        ~320 keeps the wordmark legible). */
+    imageMaxWidth: z.number().int().min(80).max(1200).optional(),
+    /** Whether to render the image logo in the Footer. Defaults to true
+        for consistency with Header. Sites with a dark footer + a dark
+        logo (where the wordmark would be unreadable) can set this to
+        false; Footer skips the logo block entirely and starts with the
+        description lede. */
+    imageInFooter: z.boolean().default(true),
   }).default({}),
   // Search / Pagefind configuration. Consumers set language-specific
   // strings here so the template stays language-agnostic.

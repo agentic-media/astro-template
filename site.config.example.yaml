@@ -20,6 +20,12 @@ logo:
   top:    "LOREM"                     # bi-colored wordmark, upper tier
   middle: ""                          # optional middle tier
   bottom: "IPSUM"                     # lower tier
+  # Optional image logo. If set, Header + Footer render <img> in place of
+  # the text wordmark above. Drop the asset in <site>/public/ and point
+  # at it with a leading slash. SVG preferred for sharp scaling.
+  # image:          "/logo.svg"
+  # imageAlt:       "Brand Name"     # falls back to identity.name
+  # imageMaxHeight: 56               # px, default 56 (range 20-160)
 
 hero:
   tagline:     "Lorem ipsum"          # eyebrow above the H1
