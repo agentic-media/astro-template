@@ -41,6 +41,10 @@ const {
 const logoImage = siteConfig.logo.image;
 const logoImageAlt = siteConfig.logo.imageAlt ?? siteName;
 const logoImageMaxHeight = siteConfig.logo.imageMaxHeight ?? 56;
+const logoImageMaxWidth = siteConfig.logo.imageMaxWidth;
+const logoImageStyle = logoImageMaxWidth
+  ? `max-width:${logoImageMaxWidth}px;height:auto;`
+  : `max-height:${logoImageMaxHeight}px;`;
 const currentYear = new Date().getFullYear();
 ---
 
@@ -51,7 +55,7 @@ const currentYear = new Date().getFullYear();
       <div class="ist-footer__brand">
         <a href="/" class:list={["ist-logo", "ist-footer__logo", { "ist-logo--image": !!logoImage }]} aria-label={siteName}>
           {logoImage ? (
-            <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={`max-height:${logoImageMaxHeight}px;`} />
+            <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={logoImageStyle} />
           ) : (
             <>
               <span class="ist-logo__top">{logoTop}</span>

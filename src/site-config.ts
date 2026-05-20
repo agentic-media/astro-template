@@ -153,6 +153,11 @@ export const SiteConfigSchema = z.object({
         Adjust per site if the logo's aspect ratio needs more vertical
         room. */
     imageMaxHeight: z.number().int().min(20).max(160).default(56),
+    /** Optional rendered max width in px for the image logo. When set,
+        wins over imageMaxHeight for wide-aspect logos that read better
+        sized horizontally (e.g. PENSION€ROMA at 1545×356 — max-width
+        ~320 keeps the wordmark legible). */
+    imageMaxWidth: z.number().int().min(80).max(1200).optional(),
   }).default({}),
   // Search / Pagefind configuration. Consumers set language-specific
   // strings here so the template stays language-agnostic.

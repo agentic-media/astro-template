@@ -159,9 +159,13 @@ p {
    Header
    ------------------------------------------------------------ */
 
+/* Header colors are themable per-site via --header-bg / --header-fg in
+   theme.cssVariables. Defaults preserve existing dark-navy + white look
+   (insieme, any consumer that doesn't override). Pensione overrides to
+   white bg + navy fg to match its legacy WP look. */
 .ist-header {
-  background-color: var(--navy);
-  color: #fff;
+  background-color: var(--header-bg, var(--navy));
+  color: var(--header-fg, #fff);
   padding: 0;
 }
 
@@ -258,7 +262,9 @@ p {
 }
 
 .ist-nav a {
-  color: rgba(255, 255, 255, 0.88);
+  /* Defaults preserve the white-on-navy look. Sites with a light header
+     override --header-fg in theme.cssVariables and links pick it up. */
+  color: var(--header-fg, rgba(255, 255, 255, 0.88));
   font-size: 0.9rem;
   font-weight: 600;
   font-family: var(--font-heading);
@@ -273,7 +279,7 @@ p {
 .ist-nav a:hover,
 .ist-nav a.active {
   color: var(--magenta);
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--header-link-hover-bg, rgba(255, 255, 255, 0.06));
 }
 
 /* Dropdown */

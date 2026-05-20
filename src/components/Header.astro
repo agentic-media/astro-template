@@ -39,6 +39,11 @@ const {
 const logoImage = siteConfig.logo.image;
 const logoImageAlt = siteConfig.logo.imageAlt ?? siteName;
 const logoImageMaxHeight = siteConfig.logo.imageMaxHeight ?? 56;
+const logoImageMaxWidth = siteConfig.logo.imageMaxWidth;
+// Build inline style from max-width (wins for wide logos) OR max-height.
+const logoImageStyle = logoImageMaxWidth
+  ? `max-width:${logoImageMaxWidth}px;height:auto;`
+  : `max-height:${logoImageMaxHeight}px;`;
 
 ---
 
@@ -48,7 +53,7 @@ const logoImageMaxHeight = siteConfig.logo.imageMaxHeight ?? 56;
       <!-- Logo: image when configured, CSS wordmark otherwise. -->
       <a href="/" class:list={["ist-logo", { "ist-logo--dual-tone": dualTone, "ist-logo--image": !!logoImage }]} aria-label={`${siteName} - Homepage`}>
         {logoImage ? (
-          <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={`max-height:${logoImageMaxHeight}px;`} />
+          <img src={logoImage} alt={logoImageAlt} class="ist-logo__img" style={logoImageStyle} />
         ) : (
           <>
             <span class="ist-logo__top">{logoTop}</span>
