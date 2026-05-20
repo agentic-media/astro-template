@@ -352,13 +352,15 @@ p {
   color: var(--magenta);
 }
 
-/* Mobile nav toggle */
+/* Mobile nav toggle — inherits --header-fg so the hamburger reads on
+   both dark-bg (default white) and light-bg (e.g. pensione's navy)
+   headers. */
 .ist-nav-toggle {
   display: none;
   background: none;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--header-fg, rgba(255, 255, 255, 0.3));
   border-radius: 4px;
-  color: #fff;
+  color: var(--header-fg, #fff);
   padding: 6px 10px;
   cursor: pointer;
   font-size: 1.2rem;
@@ -386,7 +388,10 @@ p {
     position: static;
     box-shadow: none;
     border: none;
-    background: rgba(255, 255, 255, 0.06);
+    /* Same alpha-tint pattern as link-hover-bg so it reads on both
+       dark and light headers. Pensione overrides --header-link-hover-bg
+       to a faint navy tint via theme.cssVariables. */
+    background: var(--header-link-hover-bg, rgba(255, 255, 255, 0.06));
     border-radius: 4px;
     margin-top: 4px;
   }
