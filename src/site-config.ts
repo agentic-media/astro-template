@@ -254,6 +254,16 @@ export const SiteConfigSchema = z.object({
     /** Apply dual-tone navy/gold CSS vars to the CSS wordmark logo. */
     dualToneLogo: z.boolean().default(false),
   }).default({}),
+
+  // CI-gate config consumed by scripts/accent-density-check.mjs. Not
+  // rendered at runtime. Each site declares its own diacritic-density
+  // floor; the script falls back to a permissive default if absent.
+  accent_density_check: z.object({
+    /** Reject .mdx whose diacritics-per-Italian-word density is below this. */
+    threshold: z.number().min(0).max(1).default(0.01),
+    /** Files with fewer Italian-letter words are skipped from the gate. */
+    min_words: z.number().int().min(0).default(200),
+  }).optional(),
 });
 
 export type SiteConfig = z.infer<typeof SiteConfigSchema>;

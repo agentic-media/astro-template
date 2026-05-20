@@ -96,3 +96,13 @@ media:
     quality:     78                # 1..100
     formats:     [webp]
     derivatives: []                # e.g. [480, 960] for build-time srcset
+
+# CI-gate config for scripts/accent-density-check.mjs. Catches Write-tool
+# diacritic stripping in Italian .mdx by counting accented characters per
+# Italian-letter word and rejecting any article whose density falls
+# below `threshold`. Each site declares its own floor — narrative prose
+# sits around 0.07-0.11, bureaucratic Italian (acronym-heavy) around
+# 0.02-0.04. Omit the block to use the permissive default (0.01).
+# accent_density_check:
+#   threshold: 0.04                # 1 diacritic per 25 Italian-letter words
+#   min_words: 200                 # files below this word count skip the gate
