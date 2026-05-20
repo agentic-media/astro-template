@@ -193,21 +193,21 @@ p {
 }
 
 .ist-logo__top {
-  font-size: 1.35rem;
+  font-size: var(--logo-top-size, 1.35rem);
   letter-spacing: 0.08em;
-  color: #ffffff;
+  color: var(--header-fg, #ffffff);
   text-transform: uppercase;
 }
 
 .ist-logo__salute {
-  font-size: 1.05rem;
+  font-size: var(--logo-salute-size, 1.05rem);
   letter-spacing: 0.12em;
   color: var(--magenta);
   text-transform: uppercase;
 }
 
 .ist-logo__bottom {
-  font-size: 0.75rem;
+  font-size: var(--logo-bottom-size, 0.75rem);
   letter-spacing: 0.22em;
   color: rgba(255, 255, 255, 0.75);
   text-transform: uppercase;
