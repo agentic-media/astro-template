@@ -757,24 +757,69 @@ p {
   margin: 1.5rem auto;
 }
 
+/* Tables — combined rules cover both article bodies (.ist-single__body,
+   set:html) and policy pages (.ist-single__content). The earlier
+   .ist-single__content-only selector never matched article markup, so
+   articles rendered with bare browser defaults (no borders, no padding,
+   no mobile overflow handling). See agentic-media/astro-template PR
+   2026-05-20 for the diagnosis trail.
+
+   Cells use display:block + overflow-x:auto on the table itself so
+   wide tables scroll horizontally on narrow viewports without
+   overflowing the article container. Cells still lay out as
+   table-cells inside the block, so column auto-sizing still works.
+
+   No text-align override on td — markdown emits `align="..."` HTML
+   attrs from `:---` / `---:` separator hints and the browser honors
+   them. A global override here would silently break right-aligned
+   numeric columns. */
+.ist-single__body table,
 .ist-single__content table {
+  display: block;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
+  max-width: 100%;
+  margin: 1.8rem 0;
+  font-size: 0.92rem;
   border-collapse: collapse;
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
 }
 
-.ist-single__content th,
-.ist-single__content td {
-  padding: 10px 14px;
-  border: 1px solid var(--hairline);
-  text-align: left;
-}
-
+.ist-single__body th,
 .ist-single__content th {
   background: var(--base);
   font-weight: 700;
   color: var(--navy);
+  padding: 14px 16px;
+  border: 1px solid var(--hairline);
+  border-bottom: 2px solid var(--navy);
+  text-align: left;
+  vertical-align: bottom;
+}
+
+.ist-single__body td,
+.ist-single__content td {
+  padding: 12px 16px;
+  border: 1px solid var(--hairline);
+  vertical-align: top;
+}
+
+.ist-single__body tbody tr:nth-child(even),
+.ist-single__content tbody tr:nth-child(even) {
+  background: var(--base-2);
+}
+
+@media (max-width: 600px) {
+  .ist-single__body table,
+  .ist-single__content table {
+    font-size: 0.85rem;
+  }
+  .ist-single__body th,
+  .ist-single__body td,
+  .ist-single__content th,
+  .ist-single__content td {
+    padding: 9px 12px;
+  }
 }
 
 @media (max-width: 767px) {
