@@ -8,27 +8,41 @@
 // read "perché", "città", "più" becomes "perche", "citta", "piu" — still
 // parses, still ships green, reads like illiterate Italian.
 //
-// This gate counts diacritics per Italian-letter word and rejects any
-// article whose density falls below the configured threshold. Site-specific
-// baselines vary: narrative Italian (insieme) sits at 0.07-0.11, bureaucratic
-// Italian (pensione, heavy acronyms + numbers) sits at 0.02-0.04. Each site
-// configures its own floor via `accent_density_check.threshold` in
-// `site.config.yaml`; the script defaults to 0.01 only when no site config
-// is found (catches catastrophic stripping without false-positives on
-// either register).
+// v1: density gate — rejects articles whose diacritic density falls below a
+//     configured threshold. Catches catastrophic stripping on narrative Italian
+//     but misses partial stripping on bureaucratic-register sites (baseline
+//     density ~0.02-0.04; a partially-stripped article at 0.015 looks clean).
+//
+// v2: word-signature gate — counts occurrences of five forms that are
+//     near-impossible in clean Italian prose:
+//       perche  (should be perché)
+//       puo     (should be può)
+//       piu     (should be più)
+//       citta   (should be città)
+//       e'      as free-standing word (should be è)
+//     URL slugs and bare hyperlinks are stripped before matching so that
+//     internal link hrefs (/perche-mangiare-di-piu/) don't trigger false
+//     positives. An article is flagged when its per-article signature count
+//     exceeds `signature_floor` (default 3).
+//
+// An article fails the gate when EITHER the density check OR the signature
+// check fires.
 //
 // Threshold precedence: --threshold argv > site.config.yaml > default 0.01.
+// Signature floor precedence: --signature-floor argv > site.config.yaml > default 3.
 //
 // Usage:
 //   node scripts/accent-density-check.mjs [path]
 //   node scripts/accent-density-check.mjs src/content/articles/ --threshold 0.04
 //   node scripts/accent-density-check.mjs --site-config ./site.config.yaml
 //   node scripts/accent-density-check.mjs --list-only       # report, do not fail
+//   node scripts/accent-density-check.mjs --signature-floor 2
 //
 // site.config.yaml shape (all fields optional):
 //   accent_density_check:
 //     threshold: 0.04        # density floor; lower = more permissive
 //     min_words: 200         # files below this word count are skipped
+//     signature_floor: 3     # max tolerated word-signature hits before flag
 //
 // Override per-article: set `accent_density_check: skip` in frontmatter
 // (rare — English or quote-heavy pieces).
@@ -39,11 +53,25 @@ import { join, extname, resolve } from 'node:path';
 const DIACRITIC_RE = /[àèéìíòóùúÀÈÉÌÍÒÓÙÚâêîôûÂÊÎÔÛ]/g;
 const ITALIAN_WORD_RE = /[a-zàèéìíòóùúA-ZÀÈÉÌÍÒÓÙÚâêîôûÂÊÎÔÛ]+/g;
 
+// v2: five word forms that are near-impossible in accent-clean Italian.
+// URL slugs are stripped before matching; \b anchors prevent substring hits
+// (e.g. "spunto" does not trigger "puo").
+// e' as a free-standing word uses whitespace/line anchors because the
+// apostrophe is not a word-boundary character in JS regex.
+const WORD_SIGNATURES = [
+  { name: 'perche', re: /\bperche\b/gi },
+  { name: 'puo',    re: /\bpuo\b/gi },
+  { name: 'piu',    re: /\bpiu\b/gi },
+  { name: 'citta',  re: /\bcitta\b/gi },
+  { name: "e'",     re: /(?:^|(?<=\s))e'(?=\s|$)/gim },
+];
+
 function parseArgs(argv) {
   const args = {
     paths: [],
     threshold: null,
     minWords: null,
+    signatureFloor: null,
     listOnly: false,
     siteConfig: null,
   };
@@ -51,11 +79,12 @@ function parseArgs(argv) {
     const a = argv[i];
     if (a === '--threshold') args.threshold = Number(argv[++i]);
     else if (a === '--min-words') args.minWords = Number(argv[++i]);
+    else if (a === '--signature-floor') args.signatureFloor = Number(argv[++i]);
     else if (a === '--site-config') args.siteConfig = argv[++i];
     else if (a === '--list-only') args.listOnly = true;
     else if (a === '--help' || a === '-h') {
       process.stdout.write(
-        'usage: accent-density-check.mjs [path...] [--threshold N] [--min-words N] [--site-config path] [--list-only]\n'
+        'usage: accent-density-check.mjs [path...] [--threshold N] [--min-words N] [--signature-floor N] [--site-config path] [--list-only]\n'
       );
       process.exit(0);
     } else args.paths.push(a);
@@ -93,6 +122,7 @@ function loadSiteConfigSection(path) {
     const val = m[2].replace(/^['"](.+)['"]$/, '$1');
     if (key === 'threshold') out.threshold = Number(val);
     else if (key === 'min_words') out.minWords = Number(val);
+    else if (key === 'signature_floor') out.signatureFloor = Number(val);
   }
   return out;
 }
@@ -127,6 +157,29 @@ function hasSkipFlag(frontmatter) {
   return /^\s*accent_density_check\s*:\s*skip\s*$/m.test(frontmatter);
 }
 
+// Strip markdown link targets and bare URLs so that /perche-mangiare-di-piu/
+// slug fragments in hrefs do not trigger the word-signature check.
+function stripUrls(text) {
+  // [link text](url) — keep the display text, drop the URL
+  text = text.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1');
+  // bare URLs
+  text = text.replace(/https?:\/\/\S+/g, '');
+  return text;
+}
+
+function countSignatures(text) {
+  const clean = stripUrls(text);
+  let total = 0;
+  const breakdown = {};
+  for (const sig of WORD_SIGNATURES) {
+    const m = clean.match(sig.re);
+    const c = m ? m.length : 0;
+    if (c > 0) breakdown[sig.name] = c;
+    total += c;
+  }
+  return { total, breakdown };
+}
+
 function measure(file) {
   const src = readFileSync(file, 'utf8');
   const { frontmatter, body } = splitFrontmatter(src);
@@ -139,22 +192,33 @@ function measure(file) {
   const diacritics = (text.match(DIACRITIC_RE) || []).length;
   const words = (text.match(ITALIAN_WORD_RE) || []).length;
   const density = words > 0 ? diacritics / words : 0;
-  return { file, diacritics, words, density };
+  const { total: sigCount, breakdown: sigBreakdown } = countSignatures(text);
+  return { file, diacritics, words, density, sigCount, sigBreakdown };
 }
 
-function fmtRow({ file, diacritics, words, density, skipped }) {
+function fmtRow({ file, diacritics, words, density, sigCount, sigBreakdown, skipped }) {
   if (skipped) return `SKIP ${file} (${skipped})`;
   const d = density.toFixed(4);
-  return `${density >= 0 ? '    ' : ''}diac=${String(diacritics).padStart(4)}  words=${String(words).padStart(5)}  density=${d}  ${file}`;
+  const sigSuffix = sigCount > 0
+    ? `  sigs=${sigCount}(${Object.entries(sigBreakdown).map(([k, v]) => `${k}:${v}`).join(',')})`
+    : '';
+  return `    diac=${String(diacritics).padStart(4)}  words=${String(words).padStart(5)}  density=${d}${sigSuffix}  ${file}`;
 }
 
 const args = parseArgs(process.argv.slice(2));
 
-// Resolve threshold + min-words: argv > site.config.yaml > default.
+// Resolve threshold + min-words + signature-floor: argv > site.config.yaml > default.
 const configPath = args.siteConfig || resolve('site.config.yaml');
 const fromConfig = loadSiteConfigSection(configPath);
 const threshold = args.threshold ?? fromConfig.threshold ?? 0.01;
 const minWords = args.minWords ?? fromConfig.minWords ?? 200;
+// signature_floor: max tolerated word-signature hits per article before flagging.
+// Default 3 — the five signatures are so unambiguous in clean Italian that
+// even 1-2 can indicate partial stripping, but a floor of 3 avoids noise on
+// articles with a single occurrence in a quoted passage or list item. Sites
+// processing bureaucratic-register copy (pensione baseline ~0.02-0.04) should
+// lower this to 1-2 via site.config.yaml since density alone misses partial strips.
+const signatureFloor = args.signatureFloor ?? fromConfig.signatureFloor ?? 3;
 const thresholdSource = args.threshold != null
   ? 'argv'
   : fromConfig.threshold != null
@@ -169,7 +233,8 @@ if (files.length === 0) {
 }
 
 const results = files.map(measure);
-const failures = [];
+const densityFailures = [];
+const sigFailures = [];
 const lowWord = [];
 
 for (const r of results) {
@@ -178,22 +243,31 @@ for (const r of results) {
     lowWord.push(r);
     continue;
   }
-  if (r.density < threshold) failures.push(r);
+  if (r.density < threshold) densityFailures.push(r);
+  if (r.sigCount > signatureFloor) sigFailures.push(r);
 }
+
+const failures = [...new Set([...densityFailures, ...sigFailures])];
 
 // Print sorted by density ascending — worst offenders first
 results.sort((a, b) => (a.density ?? 1) - (b.density ?? 1));
 for (const r of results) process.stdout.write(fmtRow(r) + '\n');
 
 process.stdout.write(
-  `\nchecked ${results.length} files; threshold ${threshold} (from ${thresholdSource}); min-words ${minWords}; ${failures.length} below threshold; ${lowWord.length} below min-words (skipped from gate)\n`
+  `\nchecked ${results.length} files; threshold ${threshold} (from ${thresholdSource}); min-words ${minWords}; signature-floor ${signatureFloor}; ${densityFailures.length} below density threshold; ${sigFailures.length} above signature floor; ${lowWord.length} below min-words (skipped from gate)\n`
 );
 
 if (failures.length > 0) {
   process.stdout.write('\nFAIL — likely Write-tool diacritic stripping:\n');
-  for (const r of failures) {
+  for (const r of densityFailures) {
     process.stdout.write(
-      `  ${r.file}  (${r.diacritics} diacritics across ${r.words} words; density ${r.density.toFixed(4)} < ${threshold})\n`
+      `  [density] ${r.file}  (${r.diacritics} diacritics across ${r.words} words; density ${r.density.toFixed(4)} < ${threshold})\n`
+    );
+  }
+  for (const r of sigFailures) {
+    const detail = Object.entries(r.sigBreakdown).map(([k, v]) => `${k}:${v}`).join(', ');
+    process.stdout.write(
+      `  [sigs]    ${r.file}  (${r.sigCount} signature hits > floor ${signatureFloor}: ${detail})\n`
     );
   }
   if (!args.listOnly) process.exit(1);
