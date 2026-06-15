@@ -308,8 +308,13 @@ p {
      comes from `padding-top` so the hover area stays contiguous. */
   top: 100%;
   left: 0;
-  background: var(--navy);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  /* Adopt the header palette so light-header sites (e.g. pensione: white
+     bg, navy fg) get a matching panel. Dark-header sites (insieme, pesce)
+     fall back to --navy / white, preserving the existing look. */
+  background: var(--header-bg, var(--navy));
+  /* --hairline is set to a mid-grey on pensione and absent on dark sites,
+     so the fallback keeps the original white-alpha rule on dark panels. */
+  border: 1px solid var(--hairline, rgba(255, 255, 255, 0.12));
   border-radius: var(--radius-cta);
   padding: 10px 0 6px;          /* extra top padding == visual gap, hoverable */
   margin-top: -2px;             /* tiny overlap with the toggle to seal the hover bridge */
@@ -345,11 +350,19 @@ p {
   padding: 8px 16px;
   border-radius: 0;
   font-size: 0.85rem;
+  /* Explicitly inherit the header foreground color so light-header sites
+     (pensione: --header-fg = #0e2a5a) get navy text rather than falling
+     back to the global `a` color (= --accent = red on pensione). */
+  color: var(--header-fg, #fff);
 }
 
 .ist-nav__dropdown-menu a:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--magenta);
+  /* --header-link-hover-bg is a faint navy tint on pensione
+     (rgba(14,42,90,0.06)) and absent on dark sites (falls back to the
+     original white-alpha tint). Hover color swaps to --accent so both
+     light and dark themes get a consistent brand-colour highlight. */
+  background: var(--header-link-hover-bg, rgba(255, 255, 255, 0.08));
+  color: var(--accent);
 }
 
 /* Mobile nav toggle — inherits --header-fg so the hamburger reads on
